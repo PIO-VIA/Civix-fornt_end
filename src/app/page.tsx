@@ -54,6 +54,14 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     console.log("Connexion:", { role: selectedRole, email, password });
+    
+    // Redirection selon le rôle
+    if (selectedRole === "voter") {
+      window.location.href = "/voter";
+    } else if (selectedRole === "admin") {
+      window.location.href = "/admin";
+    }
+    
     setIsLoading(false);
   };
 
