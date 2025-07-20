@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { User, Shield, ArrowRight, Vote, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle } from "lucide-react";
 
+
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<"voter" | "admin" | null>(null);
   const [email, setEmail] = useState("");
@@ -70,7 +71,7 @@ export default function LoginPage() {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+          src="/assets/vote.jpeg"
           alt="Personne votant - main mettant un bulletin dans l'urne"
           className="w-full h-full object-cover"
         />
