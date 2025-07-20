@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { User, Shield, ArrowRight, Vote, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle } from "lucide-react";
-
-
+import { useRouter } from "next/navigation";
+import { AuthentificationService } from "@/lib/services/AuthentificationService";
+import { LoginRequest } from "@/lib/models/LoginRequest";
+import { AuthResponse } from "@/lib/models/AuthResponse";
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<"voter" | "admin" | null>(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
@@ -16,7 +16,11 @@ export default function LoginPage() {
     hasSpecialChar: false,
     isValid: false
   });
-
+  const router = useRouter();
+  const [formData, setFormData] = useState<LoginRequest>({
+    email: "",
+    motDePasse: "",
+  });
   const handleRoleSelect = (role: "voter" | "admin") => {
     setSelectedRole(role);
   };
@@ -35,32 +39,45 @@ export default function LoginPage() {
     });
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    validatePassword(newPassword);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (name === "motDePasse") validatePassword(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!passwordValidation.isValid && password.length > 0) {
+    if (!passwordValidation.isValid && formData.motDePasse.length > 0) {
       alert("Le mot de passe ne respecte pas les critères de sécurité");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulation d'une connexion
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log("Connexion:", { role: selectedRole, email, password });
-    
+    // connexion
     // Redirection selon le rôle
     if (selectedRole === "voter") {
-      window.location.href = "/voter";
+      try{
+        const response: AuthResponse = await AuthentificationService.loginElecteur(formData);
+        localStorage.setItem("token", response.token || "");
+      }catch(error){
+        console.error("Erreur de connexion:", error);
+        alert("Identifiants invalides");
+      }
+      router.push("/voter");
     } else if (selectedRole === "admin") {
-      window.location.href = "/admin";
+      try{
+        const response: AuthResponse = await AuthentificationService.loginAdministrateur(formData);
+        localStorage.setItem("token", response.token || "");
+      }catch(error){
+        console.error("Erreur de connexion:", error);
+        alert("Identifiants invalides");
+      }
+      router.push( "/admin");
     }
     
     setIsLoading(false);
@@ -205,9 +222,9 @@ export default function LoginPage() {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/90 backdrop-blur-sm hover:bg-white focus:bg-white text-gray-900 placeholder-gray-500 text-sm"
                         placeholder="votre@email.com"
                         required
@@ -224,13 +241,13 @@ export default function LoginPage() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type={showPassword ? "text" : "password"}
-                        id="password"
-                        value={password}
-                        onChange={handlePasswordChange}
+                        name="motDePasse"
+                        value={formData.motDePasse}
+                        onChange={handleInputChange}
                         className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:border-transparent transition-all duration-300 bg-white/90 backdrop-blur-sm hover:bg-white focus:bg-white text-gray-900 placeholder-gray-500 text-sm ${
-                          password && !passwordValidation.isValid 
+                          formData.motDePasse && !passwordValidation.isValid 
                             ? "border-red-300 focus:ring-red-500" 
-                            : password && passwordValidation.isValid
+                            : formData.motDePasse && passwordValidation.isValid
                             ? "border-green-300 focus:ring-green-500"
                             : "border-gray-300 focus:ring-blue-500"
                         }`}
@@ -247,7 +264,7 @@ export default function LoginPage() {
                     </div>
                     
                     {/* Password Validation */}
-                    {password && (
+                    {formData.motDePasse && (
                       <div className="mt-2 space-y-1">
                         <div className="flex items-center gap-2 text-xs">
                           {passwordValidation.hasUppercase ? (
@@ -280,12 +297,12 @@ export default function LoginPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
-                          {password.length >= 8 ? (
+                          {formData.motDePasse.length >= 8 ? (
                             <CheckCircle className="w-3 h-3 text-green-500" />
                           ) : (
                             <AlertCircle className="w-3 h-3 text-red-500" />
                           )}
-                          <span className={password.length >= 8 ? "text-green-600" : "text-red-600"}>
+                          <span className={formData.motDePasse.length >= 8 ? "text-green-600" : "text-red-600"}>
                             Minimum 8 caractères
                           </span>
                         </div>
@@ -296,13 +313,13 @@ export default function LoginPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isLoading || (password.length > 0 && !passwordValidation.isValid)}
+                    disabled={isLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid)}
                     onClick={handleSubmit}
                     className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
                       selectedRole === "voter"
                         ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl"
                         : "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
-                    } ${isLoading || (password.length > 0 && !passwordValidation.isValid) ? "opacity-50 cursor-not-allowed" : "transform hover:scale-105"}`}
+                    } ${isLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid) ? "opacity-50 cursor-not-allowed" : "transform hover:scale-105"}`}
                   >
                     {isLoading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
