@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AuthentificationService } from "@/lib/services/AuthentificationService";
 import { LoginRequest } from "@/lib/models/LoginRequest";
 import { AuthResponse } from "@/lib/models/AuthResponse";
+import Image from "next/image";
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<"voter" | "admin" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -73,11 +74,12 @@ export default function LoginPage() {
       try{
         const response: AuthResponse = await AuthentificationService.loginAdministrateur(formData);
         localStorage.setItem("token", response.token || "");
+         router.push( "/admin");
       }catch(error){
         console.error("Erreur de connexion:", error);
         alert("Identifiants invalides");
       }
-      router.push( "/admin");
+     
     }
     
     setIsLoading(false);
@@ -87,9 +89,10 @@ export default function LoginPage() {
     <div className="min-h-screen relative flex items-center justify-center p-4 font-inter">
       {/* Background Image */}
       <div className="absolute inset-0">
-        <img
+        <Image
           src="/assets/vote.jpeg"
           alt="Personne votant - main mettant un bulletin dans l'urne"
+          fill
           className="w-full h-full object-cover"
         />
         {/* Overlay with gradient for better contrast */}
