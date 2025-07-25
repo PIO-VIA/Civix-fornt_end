@@ -93,7 +93,7 @@
 
 ### 1. Cloner le projet
 ```bash
-git clone <repository-url>
+git clone https://github.com/PIO-VIA/Civix-fornt_end.git
 cd civix
 ```
 
