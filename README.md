@@ -398,7 +398,7 @@ Impossible de charger les données
 
 ### 📧 **Contact**
 Pour toute question ou support technique :
-- **Email** : support@civix.com
+- **Email** : piodjiele@gmail.com
 - **Issues GitHub** : Créez une issue sur le repository
 - **Documentation API** : Consultez la documentation Swagger du backend
 
