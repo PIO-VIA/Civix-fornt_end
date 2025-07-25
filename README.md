@@ -406,9 +406,9 @@ Pour toute question ou support technique :
 
 <div align="center">
   
-**🗳️ CIVIX - Révolutionnons le vote électronique ensemble !**
+**🗳️ CIVIX - Révolutionnons le vote électronique  !**
 
-*Développé avec ❤️ et les meilleures pratiques du développement moderne*
+*Développé par moi preuve de l'application des connaissance acquises*
 
 [![Made with Next.js](https://img.shields.io/badge/Made%20with-Next.js-black?logo=next.js)](https://nextjs.org/)
 [![Powered by TypeScript](https://img.shields.io/badge/Powered%20by-TypeScript-blue?logo=typescript)](https://www.typescriptlang.org/)
