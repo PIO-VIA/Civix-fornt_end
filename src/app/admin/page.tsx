@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { Vote, LogOut, Shield, Plus, Edit, Trash2, Users, Calendar, BarChart3, Settings, Mail, UserPlus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Vote, LogOut, Shield, Plus, Edit, Trash2, Users, Calendar, BarChart3, Settings, Mail, UserPlus, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("voters");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [modalType, setModalType] = useState<"voter" | "candidate" | "campaign" | null>(null);
+  
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
+
+  // Vérifier l'authentification et le rôle admin
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      router.push('/');
+      return;
+    }
+    
+    if (user.role !== 'admin' && user.role !== 'administrateur') {
+      router.push('/');
+      return;
+    }
+  }, [isAuthenticated, user, router]);
 
   const voters = [
     { id: 1, email: "electeur1@example.com", name: "Jean Dupont", status: "active", lastLogin: "2024-12-15" },
@@ -41,9 +59,41 @@ export default function AdminPage() {
     }
   ];
 
-  const handleLogout = () => {
-    window.location.href = "/";
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
   };
+
+  // Afficher un loader pendant la vérification
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-purple-600/30 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-purple-700">Vérification des droits d'accès...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Vérifier le rôle
+  if (user.role !== 'admin' && user.role !== 'administrateur') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès non autorisé</h2>
+          <p className="text-gray-600 mb-4">Vous n'avez pas les droits d'accès à cette page.</p>
+          <button
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreateModal = (type: "voter" | "candidate" | "campaign") => {
     setModalType(type);

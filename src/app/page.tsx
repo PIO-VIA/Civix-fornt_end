@@ -1,27 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Shield, ArrowRight, Vote, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AuthentificationService } from "@/lib/services/AuthentificationService";
+import { useAuth } from "@/context/AuthContext";
 import { LoginRequest } from "@/lib/models/LoginRequest";
-import { AuthResponse } from "@/lib/models/AuthResponse";
 import Image from "next/image";
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<"voter" | "admin" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
     hasUppercase: false,
     hasNumber: false,
     hasSpecialChar: false,
     isValid: false
   });
+  const [error, setError] = useState<string>("");
+  
   const router = useRouter();
+  const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
+  
   const [formData, setFormData] = useState<LoginRequest>({
     email: "",
     motDePasse: "",
   });
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (isAuthenticated && user && !authLoading) {
+      switch (user.role) {
+        case 'electeur':
+          router.push('/voter');
+          break;
+        case 'admin':
+        case 'administrateur':
+          router.push('/admin');
+          break;
+        case 'lecteur':
+          router.push('/reader');
+          break;
+        default:
+          break;
+      }
+    }
+  }, [isAuthenticated, user, authLoading, router]);
   const handleRoleSelect = (role: "voter" | "admin") => {
     setSelectedRole(role);
   };
@@ -52,38 +74,50 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!passwordValidation.isValid && formData.motDePasse.length > 0) {
-      alert("Le mot de passe ne respecte pas les critères de sécurité");
+    if (!selectedRole) {
+      setError("Veuillez sélectionner un rôle");
       return;
     }
     
-    setIsLoading(true);
-    
-    // connexion
-    // Redirection selon le rôle
-    if (selectedRole === "voter") {
-      try{
-        const response: AuthResponse = await AuthentificationService.loginElecteur(formData);
-        localStorage.setItem("token", response.token || "");
-      }catch(error){
-        console.error("Erreur de connexion:", error);
-        alert("Identifiants invalides");
-      }
-      router.push("/voter");
-    } else if (selectedRole === "admin") {
-      try{
-        const response: AuthResponse = await AuthentificationService.loginAdministrateur(formData);
-        localStorage.setItem("token", response.token || "");
-         router.push( "/admin");
-      }catch(error){
-        console.error("Erreur de connexion:", error);
-        alert("Identifiants invalides");
-      }
-     
+    if (!passwordValidation.isValid && formData.motDePasse.length > 0) {
+      setError("Le mot de passe ne respecte pas les critères de sécurité");
+      return;
     }
     
-    setIsLoading(false);
+    setError("");
+    
+    try {
+      const role = selectedRole === "voter" ? "electeur" : "admin";
+      const response = await login(formData, role);
+      
+      // Gestion de la première connexion
+      if (response.premierConnexion) {
+        // TODO: Rediriger vers une page de changement de mot de passe
+        console.log("Première connexion détectée");
+      }
+      
+      // La redirection est gérée par useEffect ci-dessus
+      
+    } catch (error) {
+      console.error("Erreur de connexion:", error);
+      setError("Identifiants invalides ou erreur de connexion");
+    }
   };
+
+  // Afficher un loader pendant l'initialisation de l'auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900/80 via-blue-900/70 to-slate-900/80 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-600 shadow-lg mb-4">
+            <Vote className="w-8 h-8 text-white" />
+          </div>
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 font-inter">
@@ -215,6 +249,16 @@ export default function LoginPage() {
             {/* Login Form - Compact */}
             {selectedRole && (
               <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                      <span className="text-sm text-red-700">{error}</span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-4">
                   {/* Email Input */}
                   <div>
@@ -316,15 +360,15 @@ export default function LoginPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid)}
+                    disabled={authLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid)}
                     onClick={handleSubmit}
                     className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
                       selectedRole === "voter"
                         ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl"
                         : "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
-                    } ${isLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid) ? "opacity-50 cursor-not-allowed" : "transform hover:scale-105"}`}
+                    } ${authLoading || (formData.motDePasse.length > 0 && !passwordValidation.isValid) ? "opacity-50 cursor-not-allowed" : "transform hover:scale-105"}`}
                   >
-                    {isLoading ? (
+                    {authLoading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     ) : (
                       <>
