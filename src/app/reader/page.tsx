@@ -1,29 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BarChart3, Calendar, Users, Eye, Vote, TrendingUp } from "lucide-react";
+import { BarChart3, Calendar, Users, Eye, Vote, TrendingUp, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { PublicService } from "@/lib/services/PublicService";
-import { CampagnesPublicService } from "@/lib/services/CampagnesPublicService";
-import { CandidatsPublicService } from "@/lib/services/CandidatsPublicService";
+import { VoteService } from "@/lib/services/VoteService";
+import { StatistiquesPubliquesDTO } from "@/lib/models/StatistiquesPubliquesDTO";
+import { ResultatsTempsReelDTO } from "@/lib/models/ResultatsTempsReelDTO";
+import { ResultatVoteDTO } from "@/lib/models/ResultatVoteDTO";
 
 export default function ReaderPage() {
-  const [activeTab, setActiveTab] = useState("campaigns");
+  const [activeTab, setActiveTab] = useState("statistics");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
-
-  // TODO: Remplacer par de vraies API calls
-  const [publicData, setPublicData] = useState({
-    campaigns: [],
-    candidates: [],
-    results: [],
-    stats: {
-      totalVoters: 0,
-      totalVotes: 0,
-      participationRate: 0
-    }
-  });
+  
+  // États pour les données réelles
+  const [statistiques, setStatistiques] = useState<StatistiquesPubliquesDTO | null>(null);
+  const [resultatsTempsReel, setResultatsTempsReel] = useState<ResultatsTempsReelDTO | null>(null);
+  const [resultatsFinaux, setResultatsFinaux] = useState<ResultatVoteDTO[]>([]);
+  
+  const router = useRouter();
 
   useEffect(() => {
     loadPublicData();
@@ -34,55 +33,16 @@ export default function ReaderPage() {
       setIsLoading(true);
       setError("");
       
-      // TODO: Implémenter les vraies API calls
-      // const campaigns = await CampagnesPublicService.getCampagnesPubliques();
-      // const candidates = await CandidatsPublicService.getCandidatsPublics();
-      // const stats = await PublicService.getStatistiquesPubliques();
+      // Charger les données publiques depuis les vraies APIs
+      const [stats, tempsReel, finaux] = await Promise.all([
+        PublicService.obtenirStatistiquesPubliques(),
+        PublicService.obtenirResultatsTempsReel(),
+        VoteService.consulterResultats()
+      ]);
       
-      // Mock data pour le moment
-      setPublicData({
-        campaigns: [
-          {
-            id: 1,
-            title: "Élection Présidentielle 2024",
-            description: "Élection du Président de la République",
-            startDate: "2024-12-01",
-            endDate: "2024-12-31",
-            status: "en_cours",
-            candidatesCount: 3,
-            votersCount: 1500
-          }
-        ],
-        candidates: [
-          {
-            id: 1,
-            name: "Jean Dupont",
-            party: "Parti Démocrate",
-            campaignTitle: "Pour une France plus juste",
-            description: "Candidat expérimenté avec 15 ans d'expérience politique"
-          },
-          {
-            id: 2,
-            name: "Marie Martin",
-            party: "Parti Républicain",
-            campaignTitle: "L'avenir ensemble",
-            description: "Économiste reconnue, spécialiste des questions financières"
-          },
-          {
-            id: 3,
-            name: "Pierre Durand",
-            party: "Parti Centriste",
-            campaignTitle: "Unité et progrès",
-            description: "Maire de Lyon, expert en gestion locale"
-          }
-        ],
-        results: [],
-        stats: {
-          totalVoters: 1500,
-          totalVotes: 1200,
-          participationRate: 80
-        }
-      });
+      setStatistiques(stats);
+      setResultatsTempsReel(tempsReel);
+      setResultatsFinaux(finaux);
       
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
@@ -93,14 +53,14 @@ export default function ReaderPage() {
   };
 
   const handleBackToLogin = () => {
-    window.location.href = "/";
+    router.push('/');
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-green-600/30 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <LoadingSpinner size="lg" color="green" className="mx-auto mb-4" />
           <p className="text-green-700">Chargement des données publiques...</p>
         </div>
       </div>
@@ -147,7 +107,9 @@ export default function ReaderPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Électeurs inscrits</p>
-                  <p className="text-2xl font-bold text-gray-900">{publicData.stats.totalVoters.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {statistiques?.nombreElecteursTotal?.toLocaleString() || 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -159,7 +121,9 @@ export default function ReaderPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Votes exprimés</p>
-                  <p className="text-2xl font-bold text-gray-900">{publicData.stats.totalVotes.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {statistiques?.nombreVotesTotal?.toLocaleString() || 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -171,7 +135,9 @@ export default function ReaderPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Taux participation</p>
-                  <p className="text-2xl font-bold text-gray-900">{publicData.stats.participationRate}%</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {statistiques?.tauxParticipation ? `${statistiques.tauxParticipation}%` : 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -182,24 +148,24 @@ export default function ReaderPage() {
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8">
                 <button
-                  onClick={() => setActiveTab("campaigns")}
+                  onClick={() => setActiveTab("statistics")}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "campaigns"
+                    activeTab === "statistics"
                       ? "border-green-500 text-green-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
-                  Campagnes en cours
+                  Statistiques
                 </button>
                 <button
-                  onClick={() => setActiveTab("candidates")}
+                  onClick={() => setActiveTab("live")}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "candidates"
+                    activeTab === "live"
                       ? "border-green-500 text-green-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
-                  Candidats
+                  Temps réel
                 </button>
                 <button
                   onClick={() => setActiveTab("results")}
@@ -209,67 +175,108 @@ export default function ReaderPage() {
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
-                  Résultats
+                  Résultats finaux
                 </button>
               </nav>
             </div>
           </div>
 
           {/* Content */}
-          {activeTab === "campaigns" && (
-            <div className="space-y-6">
-              {publicData.campaigns.map((campaign: any) => (
-                <div key={campaign.id} className="bg-white rounded-xl shadow-sm border p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h3>
-                      <p className="text-gray-700 mb-4">{campaign.description}</p>
-                      <div className="flex items-center space-x-6 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{campaign.startDate} - {campaign.endDate}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="w-4 h-4" />
-                          <span>{campaign.candidatesCount} candidats</span>
-                        </div>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                          {campaign.status === "en_cours" ? "En cours" : "Terminée"}
-                        </span>
-                      </div>
+          {activeTab === "statistics" && (
+            <div className="bg-white rounded-xl shadow-sm border p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Statistiques détaillées</h3>
+              {statistiques ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Électeurs inscrits:</span>
+                      <span className="font-semibold">{statistiques.nombreElecteursTotal?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Votes exprimés:</span>
+                      <span className="font-semibold">{statistiques.nombreVotesTotal?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Taux de participation:</span>
+                      <span className="font-semibold">{statistiques.tauxParticipation}%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Campagnes actives:</span>
+                      <span className="font-semibold">{statistiques.nombreCampagnesActives || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Candidats total:</span>
+                      <span className="font-semibold">{statistiques.nombreCandidatsTotal || 0}</span>
                     </div>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div className="text-center text-gray-500">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-2" />
+                  <p>Aucune statistique disponible</p>
+                </div>
+              )}
             </div>
           )}
 
-          {activeTab === "candidates" && (
-            <div className="grid gap-6">
-              {publicData.candidates.map((candidate: any) => (
-                <div key={candidate.id} className="bg-white rounded-xl shadow-sm border p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{candidate.name}</h3>
-                      <p className="text-sm text-green-600 font-semibold mb-2">{candidate.party}</p>
-                      <p className="text-lg text-gray-800 font-medium mb-2">{candidate.campaignTitle}</p>
-                      <p className="text-gray-700">{candidate.description}</p>
-                    </div>
+          {activeTab === "live" && (
+            <div className="bg-white rounded-xl shadow-sm border p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Résultats temps réel</h3>
+              {resultatsTempsReel ? (
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <p className="text-lg text-gray-600">
+                      Dernière mise à jour: {new Date(resultatsTempsReel.derniereMiseAJour || '').toLocaleString()}
+                    </p>
                   </div>
+                  {resultatsTempsReel.resultats?.map((resultat, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{resultat.nomCandidat}</h4>
+                        <p className="text-sm text-gray-600">{resultat.parti}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-600">{resultat.nombreVotes}</p>
+                        <p className="text-sm text-gray-600">{resultat.pourcentage}%</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center text-gray-500">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-2" />
+                  <p>Aucun résultat temps réel disponible</p>
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "results" && (
             <div className="bg-white rounded-xl shadow-sm border p-8">
-              <div className="text-center">
-                <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">Résultats à venir</h4>
-                <p className="text-gray-600">
-                  Les résultats seront publiés à la fin de la période de vote
-                </p>
-              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Résultats finaux</h3>
+              {resultatsFinaux && resultatsFinaux.length > 0 ? (
+                <div className="space-y-4">
+                  {resultatsFinaux.map((resultat, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{resultat.nomCandidat}</h4>
+                        <p className="text-sm text-gray-600">{resultat.parti}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-purple-600">{resultat.nombreVotes}</p>
+                        <p className="text-sm text-gray-600">{resultat.pourcentage}%</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-2" />
+                  <p>Aucun résultat final disponible</p>
+                </div>
+              )}
             </div>
           )}
         </div>
