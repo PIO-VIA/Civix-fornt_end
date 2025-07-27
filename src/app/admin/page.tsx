@@ -192,6 +192,7 @@ export default function AdminPage() {
       await loadCampagnes();
     } catch (error) {
       showError('Erreur', 'Impossible de créer la campagne');
+      console.log('Erreur création campagne:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -245,7 +246,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner size="md" color="purple" className="mx-auto mb-4" />
-          <p className="text-purple-700">Vérification des droits d'accès...</p>
+          <p className="text-purple-700">{"Vérification des droits d'accès..."}</p>
         </div>
       </div>
     );
@@ -258,12 +259,12 @@ export default function AdminPage() {
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès non autorisé</h2>
-          <p className="text-gray-600 mb-4">Vous n'avez pas les droits d'accès à cette page.</p>
+          <p className="text-gray-600 mb-4">{"Vous n'avez pas les droits d'accès à cette page."}</p>
           <button
             onClick={() => router.push('/')}
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
-            Retour à l'accueil
+            {"Retour à l'accueil"}
           </button>
         </div>
       </div>
@@ -295,7 +296,7 @@ export default function AdminPage() {
                 Tableau de bord administrateur
               </h2>
               <p className="text-gray-600">
-                {dashboardData?.messageBienvenue || "Gérez les électeurs, candidats, campagnes et surveillez les élections"}
+                { "Gérez les électeurs, candidats, campagnes et surveillez les élections"}
               </p>
             </div>
 
