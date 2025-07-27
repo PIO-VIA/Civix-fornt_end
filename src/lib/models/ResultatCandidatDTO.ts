@@ -3,7 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ResultatCandidatDTO = {
-    nomCandidat?: string;
+    candidatId?: string;
+    candidatNom?: string;
     nombreVotes?: number;
     pourcentageVotes?: number;
 };
