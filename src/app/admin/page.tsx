@@ -11,18 +11,21 @@ import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/hooks/useNotification";
 import { TableauxDeBordService } from "@/lib/services/TableauxDeBordService";
 import { AdministrationService } from "@/lib/services/AdministrationService";
+import { ElectionsService } from "@/lib/services/ElectionsService";
 import { DashboardAdminDTO } from "@/lib/models/DashboardAdminDTO";
 import { ElecteurDTO } from "@/lib/models/ElecteurDTO";
 import { CandidatDTO } from "@/lib/models/CandidatDTO";
 import { CampagneDTO } from "@/lib/models/CampagneDTO";
+import { ElectionDTO } from "@/lib/models/ElectionDTO";
 import { CreateElecteurAdminRequest } from "@/lib/models/CreateElecteurAdminRequest";
 import { CreateCandidatRequest } from "@/lib/models/CreateCandidatRequest";
 import { CreateCampagneRequest } from "@/lib/models/CreateCampagneRequest";
+import { CreateElectionRequest } from "@/lib/models/CreateElectionRequest";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [modalType, setModalType] = useState<"voter" | "candidate" | "campaign" | null>(null);
+  const [modalType, setModalType] = useState<"voter" | "candidate" | "campaign" | "election" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -31,6 +34,7 @@ export default function AdminPage() {
   const [electeurs, setElecteurs] = useState<ElecteurDTO[]>([]);
   const [candidats, setCandidats] = useState<CandidatDTO[]>([]);
   const [campagnes, setCampagnes] = useState<CampagneDTO[]>([]);
+  const [elections, setElections] = useState<ElectionDTO[]>([]);
   
   // États pour les formulaires
   const [newElecteur, setNewElecteur] = useState<CreateElecteurAdminRequest>({
@@ -38,12 +42,22 @@ export default function AdminPage() {
     username: ''
   });
   const [newCandidat, setNewCandidat] = useState<CreateCandidatRequest>({
-    email: '',
     username: ''
   });
   const [newCampagne, setNewCampagne] = useState<CreateCampagneRequest>({
     candidatId: '',
     description: ''
+  });
+  const [newElection, setNewElection] = useState<CreateElectionRequest>({
+    titre: '',
+    description: '',
+    dateDebut: '',
+    dateFin: '',
+    autoriserVoteMultiple: false,
+    nombreMaxVotesParElecteur: 1,
+    resultatsVisibles: false,
+    electeursAutorises: [],
+    candidatsParticipants: []
   });
   
   const { user, isAuthenticated, logout, token } = useAuth();
@@ -77,7 +91,8 @@ export default function AdminPage() {
         loadDashboard(),
         loadElecteurs(),
         loadCandidats(),
-        loadCampagnes()
+        loadCampagnes(),
+        loadElections()
       ]);
     } catch (error) {
       showError('Erreur', 'Impossible de charger les données');
@@ -122,6 +137,15 @@ export default function AdminPage() {
     }
   };
 
+  const loadElections = async () => {
+    try {
+      const electionsList = await ElectionsService.listerMesElections();
+      setElections(electionsList);
+    } catch (error) {
+      console.error('Erreur chargement élections:', error);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     router.push('/');
@@ -148,7 +172,7 @@ export default function AdminPage() {
       setIsSubmitting(true);
       await AdministrationService.creerCandidat(`Bearer ${token}`, newCandidat);
       showSuccess('Succès', 'Candidat créé avec succès');
-      setNewCandidat({ email: '', username: '' });
+      setNewCandidat({ username: '' });
       setShowCreateModal(false);
       await loadCandidats();
     } catch (error) {
@@ -173,6 +197,31 @@ export default function AdminPage() {
     }
   };
 
+  const handleCreateElection = async () => {
+    try {
+      setIsSubmitting(true);
+      await ElectionsService.creerElection(newElection);
+      showSuccess('Succès', 'Élection créée avec succès');
+      setNewElection({
+        titre: '',
+        description: '',
+        dateDebut: '',
+        dateFin: '',
+        autoriserVoteMultiple: false,
+        nombreMaxVotesParElecteur: 1,
+        resultatsVisibles: false,
+        electeursAutorises: [],
+        candidatsParticipants: []
+      });
+      setShowCreateModal(false);
+      await loadElections();
+    } catch (error) {
+      showError('Erreur', 'Impossible de créer l\'élection');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDeleteElecteur = async (electeurId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet électeur ?')) return;
     
@@ -185,7 +234,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleCreateModal = (type: "voter" | "candidate" | "campaign") => {
+  const handleCreateModal = (type: "voter" | "candidate" | "campaign" | "election") => {
     setModalType(type);
     setShowCreateModal(true);
   };
@@ -251,7 +300,7 @@ export default function AdminPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -288,7 +337,18 @@ export default function AdminPage() {
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Vote className="w-6 h-6 text-orange-600" />
+                    <Calendar className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Élections</p>
+                    <p className="text-2xl font-bold text-gray-900">{elections.length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <Vote className="w-6 h-6 text-red-600" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Votes</p>
@@ -344,6 +404,16 @@ export default function AdminPage() {
                   >
                     Campagnes ({campagnes.length})
                   </button>
+                  <button
+                    onClick={() => setActiveTab("elections")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "elections"
+                        ? "border-purple-500 text-purple-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Élections ({elections.length})
+                  </button>
                 </nav>
               </div>
             </div>
@@ -351,19 +421,6 @@ export default function AdminPage() {
             {/* Content */}
             {activeTab === "dashboard" && (
               <div className="space-y-6">
-                {dashboardData?.recommendations && dashboardData.recommendations.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-sm border p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommandations</h3>
-                    <div className="space-y-2">
-                      {dashboardData.recommendations.map((recommendation, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-sm text-gray-700">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span>{recommendation}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 
                 <div className="bg-white rounded-xl shadow-sm border p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Vue d'ensemble</h3>
@@ -382,6 +439,10 @@ export default function AdminPage() {
                         <div className="flex justify-between">
                           <span>Total campagnes:</span>
                           <span className="font-medium">{campagnes.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Total élections:</span>
+                          <span className="font-medium">{elections.length}</span>
                         </div>
                       </div>
                     </div>
@@ -487,7 +548,7 @@ export default function AdminPage() {
                               <h4 className="font-semibold text-gray-900 mb-1">
                                 {candidat.username || 'Candidat'}
                               </h4>
-                              <p className="text-sm text-gray-600 mb-2">{candidat.email}</p>
+                              <p className="text-sm text-gray-600 mb-2">ID: {candidat.externalIdCandidat}</p>
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
                                 <span>Votes: {candidat.votes?.length || 0}</span>
                                 <span>Campagnes: {candidat.campagnes?.length || 0}</span>
@@ -540,8 +601,75 @@ export default function AdminPage() {
                               <h4 className="font-semibold text-gray-900 mb-1">Campagne #{index + 1}</h4>
                               <p className="text-sm text-gray-600 mb-2">{campagne.description || 'Pas de description'}</p>
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                <span>Candidat ID: {campagne.candidatIds?.[0] || 'N/A'}</span>
+                                <span>Candidat ID: {campagne.candidat?.externalIdCandidat || 'N/A'}</span>
                               </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "elections" && (
+              <div className="bg-white rounded-xl shadow-sm border">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-900">Gestion des élections</h3>
+                    <button
+                      onClick={() => handleCreateModal("election")}
+                      className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Nouvelle élection</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-6">
+                  {elections.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h4 className="text-xl font-semibold text-gray-900 mb-2">Aucune élection</h4>
+                      <p className="text-gray-600">Créez votre première élection pour commencer</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {elections.map((election) => (
+                        <div key={election.externalIdElection} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-1">
+                                {election.titre || 'Élection sans titre'}
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-2">{election.description || 'Pas de description'}</p>
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  election.statut === 'OUVERTE' || election.statut === 'EN_COURS' ? 'bg-green-100 text-green-800' :
+                                  election.statut === 'TERMINEE' ? 'bg-gray-100 text-gray-800' :
+                                  election.statut === 'PLANIFIEE' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {election.statut || 'N/A'}
+                                </span>
+                                <span>Candidats: {election.nombreCandidats || 0}</span>
+                                <span>Électeurs: {election.nombreElecteursInscrits || 0}</span>
+                                <span>Votes: {election.nombreVotes || 0}</span>
+                              </div>
+                              {election.dateDebut && election.dateFin && (
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Du {new Date(election.dateDebut).toLocaleDateString()} au {new Date(election.dateFin).toLocaleDateString()}
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center space-x-2">
                               <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
@@ -569,7 +697,8 @@ export default function AdminPage() {
           title={
             modalType === "voter" ? "Nouvel électeur" :
             modalType === "candidate" ? "Nouveau candidat" :
-            modalType === "campaign" ? "Nouvelle campagne" : ""
+            modalType === "campaign" ? "Nouvelle campagne" :
+            modalType === "election" ? "Nouvelle élection" : ""
           }
           size="md"
         >
@@ -632,18 +761,6 @@ export default function AdminPage() {
                   placeholder="Nom du candidat"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  value={newCandidat.email}
-                  onChange={(e) => setNewCandidat({...newCandidat, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="email@exemple.com"
-                />
-              </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -653,7 +770,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   onClick={handleCreateCandidat}
-                  disabled={isSubmitting || !newCandidat.email || !newCandidat.username}
+                  disabled={isSubmitting || !newCandidat.username}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                 >
                   {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
@@ -704,6 +821,111 @@ export default function AdminPage() {
                 <button
                   onClick={handleCreateCampagne}
                   disabled={isSubmitting || !newCampagne.candidatId || !newCampagne.description}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
+                  <span>Créer</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {modalType === "election" && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Titre de l&apos;élection
+                </label>
+                <input
+                  type="text"
+                  value={newElection.titre}
+                  onChange={(e) => setNewElection({...newElection, titre: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Titre de l'élection"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newElection.description}
+                  onChange={(e) => setNewElection({...newElection, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Description de l'élection"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date de début
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={newElection.dateDebut}
+                    onChange={(e) => setNewElection({...newElection, dateDebut: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date de fin
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={newElection.dateFin}
+                    onChange={(e) => setNewElection({...newElection, dateFin: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newElection.autoriserVoteMultiple}
+                      onChange={(e) => setNewElection({...newElection, autoriserVoteMultiple: e.target.checked})}
+                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    <span className="text-sm text-gray-700">Autoriser vote multiple</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newElection.resultatsVisibles}
+                      onChange={(e) => setNewElection({...newElection, resultatsVisibles: e.target.checked})}
+                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    <span className="text-sm text-gray-700">Résultats visibles</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre max de votes par électeur
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newElection.nombreMaxVotesParElecteur}
+                  onChange={(e) => setNewElection({...newElection, nombreMaxVotesParElecteur: parseInt(e.target.value) || 1})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleCreateElection}
+                  disabled={isSubmitting || !newElection.titre || !newElection.dateDebut || !newElection.dateFin}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                 >
                   {isSubmitting && <LoadingSpinner size="sm" color="purple" />}

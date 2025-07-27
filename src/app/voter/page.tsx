@@ -8,18 +8,21 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { TableauxDeBordService } from "@/lib/services/TableauxDeBordService";
 import { VoteService } from "@/lib/services/VoteService";
+import { ElectionsService } from "@/lib/services/ElectionsService";
 import { DashboardElecteurDTO } from "@/lib/models/DashboardElecteurDTO";
 import { StatutVoteElecteurDTO } from "@/lib/models/StatutVoteElecteurDTO";
 import { VoteResponse } from "@/lib/models/VoteResponse";
+import { ElectionDTO } from "@/lib/models/ElectionDTO";
 
 export default function VoterPage() {
-  const [activeTab, setActiveTab] = useState("candidates");
+  const [activeTab, setActiveTab] = useState("elections");
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isVoting, setIsVoting] = useState(false);
   const [error, setError] = useState<string>("");
   const [dashboardData, setDashboardData] = useState<DashboardElecteurDTO | null>(null);
   const [voteStatus, setVoteStatus] = useState<StatutVoteElecteurDTO | null>(null);
+  const [electionsDisponibles, setElectionsDisponibles] = useState<ElectionDTO[]>([]);
   
   const { user, token, logout, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -36,6 +39,7 @@ export default function VoterPage() {
     if (isAuthenticated && token) {
       loadDashboardData();
       loadVoteStatus();
+      loadElectionsDisponibles();
     }
   }, [isAuthenticated, token]);
 
@@ -61,6 +65,15 @@ export default function VoterPage() {
       setVoteStatus(status);
     } catch (error) {
       console.error("Erreur lors du chargement du statut de vote:", error);
+    }
+  };
+
+  const loadElectionsDisponibles = async () => {
+    try {
+      const elections = await ElectionsService.listerElectionsDisponibles();
+      setElectionsDisponibles(elections);
+    } catch (error) {
+      console.error("Erreur lors du chargement des élections disponibles:", error);
     }
   };
 
@@ -242,6 +255,16 @@ export default function VoterPage() {
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8">
                 <button
+                  onClick={() => setActiveTab("elections")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "elections"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Élections ({electionsDisponibles.length})
+                </button>
+                <button
                   onClick={() => setActiveTab("candidates")}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === "candidates"
@@ -287,6 +310,79 @@ export default function VoterPage() {
           </div>
 
           {/* Content */}
+          {activeTab === "elections" && (
+            <div className="grid gap-6">
+              {electionsDisponibles.map((election) => (
+                <div key={election.externalIdElection} className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {election.titre || 'Élection sans titre'}
+                        </h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          election.statut === 'OUVERTE' || election.statut === 'EN_COURS' ? 'bg-green-100 text-green-800' :
+                          election.statut === 'TERMINEE' ? 'bg-gray-100 text-gray-800' :
+                          election.statut === 'PLANIFIEE' ? 'bg-blue-100 text-blue-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {election.statut || 'N/A'}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-4">{election.description || 'Pas de description'}</p>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                        <div>
+                          <span className="font-medium">Candidats:</span> {election.nombreCandidats || 0}
+                        </div>
+                        <div>
+                          <span className="font-medium">Électeurs inscrits:</span> {election.nombreElecteursInscrits || 0}
+                        </div>
+                        <div>
+                          <span className="font-medium">Votes exprimés:</span> {election.nombreVotes || 0}
+                        </div>
+                        <div>
+                          <span className="font-medium">Vote multiple:</span> {election.autoriserVoteMultiple ? 'Autorisé' : 'Non autorisé'}
+                        </div>
+                      </div>
+                      {election.dateDebut && election.dateFin && (
+                        <div className="text-sm text-gray-500">
+                          <Calendar className="w-4 h-4 inline mr-1" />
+                          Du {new Date(election.dateDebut).toLocaleDateString()} au {new Date(election.dateFin).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      {election.estActive && !voteStatus?.avote && (
+                        <button
+                          onClick={() => setActiveTab("candidates")}
+                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Vote className="w-4 h-4" />
+                          <span>Voter</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setActiveTab("results")}
+                        className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Résultats</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {electionsDisponibles.length === 0 && (
+                <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+                  <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-xl font-semibold text-gray-900 mb-2">Aucune élection disponible</h4>
+                  <p className="text-gray-600">Il n'y a actuellement aucune élection ouverte pour voter.</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === "candidates" && (
             <div className="grid gap-6">
               {dashboardData.candidatsDisponibles?.map((candidatAvecStatut) => (
