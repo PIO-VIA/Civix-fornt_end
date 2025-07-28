@@ -162,6 +162,7 @@ export default function AdminPage() {
       await loadElecteurs();
     } catch (error) {
       showError('Erreur', 'Impossible de créer l\'électeur');
+      console.log('erreur crreation electeur :', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -218,6 +219,7 @@ export default function AdminPage() {
       await loadElections();
     } catch (error) {
       showError('Erreur', 'Impossible de créer l\'élection');
+      console.log('erreur creation electeur :', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -232,6 +234,7 @@ export default function AdminPage() {
       await loadElecteurs();
     } catch (error) {
       showError('Erreur', 'Impossible de supprimer l\'électeur');
+      console.log('erreur suppresion electeur:', error);
     }
   };
 
