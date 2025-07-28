@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Vote, LogOut, Shield, Plus, Edit, Trash2, Users, Calendar, BarChart3, Settings, Mail, UserPlus, AlertCircle } from "lucide-react";
+import { Vote,  Plus, Edit, Trash2, Users, Calendar, BarChart3, Mail, UserPlus, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -96,6 +96,7 @@ export default function AdminPage() {
       ]);
     } catch (error) {
       showError('Erreur', 'Impossible de charger les données');
+      console.error('Erreur lors du chargement des données:', error);
     } finally {
       setIsLoading(false);
     }
@@ -178,6 +179,7 @@ export default function AdminPage() {
       await loadCandidats();
     } catch (error) {
       showError('Erreur', 'Impossible de créer le candidat');
+      console.log('erreur creation candidat:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -357,7 +359,7 @@ export default function AdminPage() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Votes</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {dashboardData?.statistiquesGlobales?.nombreVotesTotal || 0}
+                      {dashboardData?.nombreVotesTotal || 0}
                     </p>
                   </div>
                 </div>
@@ -427,7 +429,7 @@ export default function AdminPage() {
               <div className="space-y-6">
                 
                 <div className="bg-white rounded-xl shadow-sm border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vue d'ensemble</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{"Vue d'ensemble"}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">Statistiques générales</h4>
@@ -710,7 +712,7 @@ export default function AdminPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom d'utilisateur
+                  {"Nom d'utilisateur"}
                 </label>
                 <input
                   type="text"
@@ -755,7 +757,7 @@ export default function AdminPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom d'utilisateur
+                  {"Nom d'utilisateur"}
                 </label>
                 <input
                   type="text"
