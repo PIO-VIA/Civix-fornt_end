@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Modal from "@/components/ui/Modal";
+import FormModal from "@/components/ui/FormModal";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Textarea from "@/components/ui/Textarea";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/hooks/useNotification";
@@ -697,250 +701,197 @@ export default function AdminPage() {
         </div>
 
         {/* Modales */}
-        <Modal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          title={
-            modalType === "voter" ? "Nouvel électeur" :
-            modalType === "candidate" ? "Nouveau candidat" :
-            modalType === "campaign" ? "Nouvelle campagne" :
-            modalType === "election" ? "Nouvelle élection" : ""
-          }
+        
+        {/* Modal de création - Électeur */}
+        <FormModal
+          isOpen={showCreateModal && modalType === "voter"}
+          onClose={() => {
+            setShowCreateModal(false);
+            setNewElecteur({ email: '', username: '' });
+          }}
+          title="Nouvel électeur"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateElecteur();
+          }}
+          isLoading={isSubmitting}
+          submitText="Créer l'électeur"
           size="md"
         >
-          {modalType === "voter" && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {"Nom d'utilisateur"}
-                </label>
-                <input
-                  type="text"
-                  value={newElecteur.username}
-                  onChange={(e) => setNewElecteur({...newElecteur, username: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Nom d'utilisateur"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  value={newElecteur.email}
-                  onChange={(e) => setNewElecteur({...newElecteur, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="email@exemple.com"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleCreateElecteur}
-                  disabled={isSubmitting || !newElecteur.email || !newElecteur.username}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                >
-                  {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
-                  <span>Créer</span>
-                </button>
-              </div>
-            </div>
-          )}
+          <Input
+            label="Nom d'utilisateur"
+            type="text"
+            value={newElecteur.username}
+            onChange={(e) => setNewElecteur({...newElecteur, username: e.target.value})}
+            placeholder="Nom d'utilisateur"
+            required
+          />
+          <Input
+            label="Adresse email"
+            type="email"
+            value={newElecteur.email}
+            onChange={(e) => setNewElecteur({...newElecteur, email: e.target.value})}
+            placeholder="email@exemple.com"
+            required
+          />
+        </FormModal>
 
-          {modalType === "candidate" && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {"Nom d'utilisateur"}
-                </label>
-                <input
-                  type="text"
-                  value={newCandidat.username}
-                  onChange={(e) => setNewCandidat({...newCandidat, username: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Nom du candidat"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleCreateCandidat}
-                  disabled={isSubmitting || !newCandidat.username}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                >
-                  {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
-                  <span>Créer</span>
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Modal de création - Candidat */}
+        <FormModal
+          isOpen={showCreateModal && modalType === "candidate"}
+          onClose={() => {
+            setShowCreateModal(false);
+            setNewCandidat({ username: '' });
+          }}
+          title="Nouveau candidat"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateCandidat();
+          }}
+          isLoading={isSubmitting}
+          submitText="Créer le candidat"
+          size="md"
+        >
+          <Input
+            label="Nom d'utilisateur"
+            type="text"
+            value={newCandidat.username}
+            onChange={(e) => setNewCandidat({...newCandidat, username: e.target.value})}
+            placeholder="Nom du candidat"
+            required
+          />
+        </FormModal>
 
-          {modalType === "campaign" && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Candidat
-                </label>
-                <select
-                  value={newCampagne.candidatId}
-                  onChange={(e) => setNewCampagne({...newCampagne, candidatId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="">Sélectionner un candidat</option>
-                  {candidats.map((candidat) => (
-                    <option key={candidat.externalIdCandidat} value={candidat.externalIdCandidat}>
-                      {candidat.username} ({candidat.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newCampagne.description}
-                  onChange={(e) => setNewCampagne({...newCampagne, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Description de la campagne"
-                  rows={3}
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleCreateCampagne}
-                  disabled={isSubmitting || !newCampagne.candidatId || !newCampagne.description}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                >
-                  {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
-                  <span>Créer</span>
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Modal de création - Campagne */}
+        <FormModal
+          isOpen={showCreateModal && modalType === "campaign"}
+          onClose={() => {
+            setShowCreateModal(false);
+            setNewCampagne({ candidatId: '', description: '' });
+          }}
+          title="Nouvelle campagne"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateCampagne();
+          }}
+          isLoading={isSubmitting}
+          submitText="Créer la campagne"
+          size="md"
+        >
+          <Select
+            label="Candidat"
+            value={newCampagne.candidatId}
+            onChange={(e) => setNewCampagne({...newCampagne, candidatId: e.target.value})}
+            options={candidats.map((candidat) => ({
+              value: candidat.externalIdCandidat || '',
+              label: `${candidat.username} (${candidat.email})`
+            }))}
+            placeholder="Sélectionner un candidat"
+            required
+          />
+          <Textarea
+            label="Description"
+            value={newCampagne.description}
+            onChange={(e) => setNewCampagne({...newCampagne, description: e.target.value})}
+            placeholder="Description de la campagne"
+            rows={3}
+            required
+          />
+        </FormModal>
 
-          {modalType === "election" && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Titre de l&apos;élection
-                </label>
-                <input
-                  type="text"
-                  value={newElection.titre}
-                  onChange={(e) => setNewElection({...newElection, titre: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Titre de l'élection"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newElection.description}
-                  onChange={(e) => setNewElection({...newElection, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Description de l'élection"
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date de début
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={newElection.dateDebut}
-                    onChange={(e) => setNewElection({...newElection, dateDebut: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date de fin
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={newElection.dateFin}
-                    onChange={(e) => setNewElection({...newElection, dateFin: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={newElection.autoriserVoteMultiple}
-                      onChange={(e) => setNewElection({...newElection, autoriserVoteMultiple: e.target.checked})}
-                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-gray-700">Autoriser vote multiple</span>
-                  </label>
-                </div>
-                <div>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={newElection.resultatsVisibles}
-                      onChange={(e) => setNewElection({...newElection, resultatsVisibles: e.target.checked})}
-                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-gray-700">Résultats visibles</span>
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre max de votes par électeur
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newElection.nombreMaxVotesParElecteur}
-                  onChange={(e) => setNewElection({...newElection, nombreMaxVotesParElecteur: parseInt(e.target.value) || 1})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleCreateElection}
-                  disabled={isSubmitting || !newElection.titre || !newElection.dateDebut || !newElection.dateFin}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                >
-                  {isSubmitting && <LoadingSpinner size="sm" color="purple" />}
-                  <span>Créer</span>
-                </button>
-              </div>
+        {/* Modal de création - Élection */}
+        <FormModal
+          isOpen={showCreateModal && modalType === "election"}
+          onClose={() => {
+            setShowCreateModal(false);
+            setNewElection({
+              titre: '',
+              description: '',
+              dateDebut: '',
+              dateFin: '',
+              autoriserVoteMultiple: false,
+              nombreMaxVotesParElecteur: 1,
+              resultatsVisibles: false,
+              electeursAutorises: [],
+              candidatsParticipants: []
+            });
+          }}
+          title="Nouvelle élection"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateElection();
+          }}
+          isLoading={isSubmitting}
+          submitText="Créer l'élection"
+          size="lg"
+        >
+          <Input
+            label="Titre de l'élection"
+            type="text"
+            value={newElection.titre}
+            onChange={(e) => setNewElection({...newElection, titre: e.target.value})}
+            placeholder="Titre de l'élection"
+            required
+          />
+          <Textarea
+            label="Description"
+            value={newElection.description}
+            onChange={(e) => setNewElection({...newElection, description: e.target.value})}
+            placeholder="Description de l'élection"
+            rows={3}
+            required
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Date de début"
+              type="datetime-local"
+              value={newElection.dateDebut}
+              onChange={(e) => setNewElection({...newElection, dateDebut: e.target.value})}
+              required
+            />
+            <Input
+              label="Date de fin"
+              type="datetime-local"
+              value={newElection.dateFin}
+              onChange={(e) => setNewElection({...newElection, dateFin: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-4 border-t pt-4">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="autoriserVoteMultiple"
+                checked={newElection.autoriserVoteMultiple}
+                onChange={(e) => setNewElection({...newElection, autoriserVoteMultiple: e.target.checked})}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="autoriserVoteMultiple" className="text-sm font-medium text-gray-700">
+                Autoriser le vote multiple
+              </label>
             </div>
-          )}
-        </Modal>
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="resultatsVisibles"
+                checked={newElection.resultatsVisibles}
+                onChange={(e) => setNewElection({...newElection, resultatsVisibles: e.target.checked})}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="resultatsVisibles" className="text-sm font-medium text-gray-700">
+                Résultats visibles immédiatement
+              </label>
+            </div>
+            <Input
+              label="Nombre maximum de votes par électeur"
+              type="number"
+              min={1}
+              value={newElection.nombreMaxVotesParElecteur}
+              onChange={(e) => setNewElection({...newElection, nombreMaxVotesParElecteur: parseInt(e.target.value) || 1})}
+              required
+            />
+          </div>
+        </FormModal>
       </div>
       <Footer />
       

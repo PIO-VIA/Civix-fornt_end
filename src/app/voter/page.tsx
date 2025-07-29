@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Vote, Calendar, CheckCircle, Clock, Eye, AlertCircle, User } from "lucide-react";
+import { Vote, Calendar, CheckCircle, Clock, Eye, AlertCircle, User, Bell, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -23,6 +23,7 @@ export default function VoterPage() {
   const [dashboardData, setDashboardData] = useState<DashboardElecteurDTO | null>(null);
   const [voteStatus, setVoteStatus] = useState<StatutVoteElecteurDTO | null>(null);
   const [electionsDisponibles, setElectionsDisponibles] = useState<ElectionDTO[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   
   const { user, token, logout, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -305,6 +306,26 @@ export default function VoterPage() {
                 >
                   Résultats
                 </button>
+                <button
+                  onClick={() => setActiveTab("profile")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "profile"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Mon Profil
+                </button>
+                <button
+                  onClick={() => setActiveTab("notifications")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "notifications"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Notifications
+                </button>
               </nav>
             </div>
           </div>
@@ -579,6 +600,117 @@ export default function VoterPage() {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "profile" && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-lg font-semibold text-gray-900">Mon Profil</h4>
+                <button
+                  onClick={() => router.push('/voter/profile')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Gérer mon profil</span>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <User className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Nom d'utilisateur</p>
+                      <p className="text-gray-900 font-medium">{user?.username}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <Eye className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="text-gray-900 font-medium">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Statut</p>
+                      <p className="text-green-600 font-medium">Compte actif</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Dernière connexion</p>
+                      <p className="text-gray-900 font-medium">{new Date().toLocaleDateString('fr-FR')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 mb-4">
+                  Accédez à votre profil complet pour modifier vos informations personnelles et changer votre mot de passe.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "notifications" && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-lg font-semibold text-gray-900">Notifications</h4>
+                <div className="flex items-center space-x-2">
+                  <Bell className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm text-gray-500">
+                    {notifications.length === 0 ? "Aucune notification" : `${notifications.length} notification(s)`}
+                  </span>
+                </div>
+              </div>
+              
+              {notifications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-xl font-semibold text-gray-900 mb-2">Aucune notification</h4>
+                  <p className="text-gray-600">
+                    Vous serez notifié des nouvelles élections, des résultats et des mises à jour importantes.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {notifications.map((notification, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900 mb-1">{notification.title}</h5>
+                          <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+                          <p className="text-xs text-gray-400">{notification.date}</p>
+                        </div>
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          notification.type === 'info' ? 'bg-blue-100 text-blue-800' :
+                          notification.type === 'success' ? 'bg-green-100 text-green-800' :
+                          notification.type === 'warning' ? 'bg-orange-100 text-orange-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {notification.type}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600">
+                  Les notifications importantes concernant les élections et votre participation apparaîtront ici.
+                </p>
+              </div>
             </div>
           )}
         </div>
