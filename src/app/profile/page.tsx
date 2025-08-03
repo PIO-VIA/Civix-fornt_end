@@ -5,7 +5,6 @@ import { User, Mail, Calendar, Shield, Key, Save, AlertCircle, CheckCircle, Eye,
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import { ChangePasswordRequest } from "@/lib/models/ChangePasswordRequest";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();

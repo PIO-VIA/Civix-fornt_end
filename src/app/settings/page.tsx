@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Shield, Bell, Globe, Lock, Moon, Sun, Monitor, ChevronRight, Key } from "lucide-react";
+import { Shield, Bell, Globe, Lock, Moon, Sun, Monitor, ChevronRight, Key } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";

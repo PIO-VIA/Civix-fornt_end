@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Vote, Plus, Edit, Trash2, Users, Calendar, BarChart3, Mail, UserPlus, AlertCircle, Shield, FileImage, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Modal from "@/components/ui/Modal";
 import FormModal from "@/components/ui/FormModal";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -266,7 +265,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="text-center">
             <LoadingSpinner size="md" color="purple" className="mx-auto mb-4" />
-            <p className="text-purple-700">Vérification des droits d'accès...</p>
+            <p className="text-purple-700">{"Vérification des droits d'accès..."}</p>
           </div>
         </div>
       </div>
@@ -282,12 +281,12 @@ export default function AdminPage() {
           <div className="text-center max-w-md mx-auto p-8">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Accès non autorisé</h2>
-            <p className="text-gray-600 mb-6">Vous n'avez pas les droits d'accès à cette page d'administration.</p>
+            <p className="text-gray-600 mb-6">{"Vous n'avez pas les droits d'accès à cette page d'administration."}</p>
             <button
               onClick={() => router.push('/')}
               className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
-              Retour à l'accueil
+              {"Retour à l'accueil"}
             </button>
           </div>
         </div>
@@ -434,7 +433,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 min-h-[600px]">
           {activeTab === "dashboard" && (
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Vue d'ensemble</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">{"Vue d'ensemble"}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
                   <h4 className="font-semibold text-blue-900 mb-4">Statistiques générales</h4>
@@ -866,7 +865,7 @@ export default function AdminPage() {
             <label htmlFor="candidate-image" className="cursor-pointer">
               <FileImage className="w-8 h-8 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-600">Cliquez pour sélectionner une image</p>
-              <p className="text-xs text-gray-500">PNG, JPG jusqu'à 5MB</p>
+              <p className="text-xs text-gray-500">{"PNG, JPG jusqu'à 5MB"}</p>
             </label>
             {selectedImages['candidate'] && (
               <p className="text-sm text-green-600 mt-2">
@@ -929,7 +928,7 @@ export default function AdminPage() {
             <label htmlFor="campaign-image" className="cursor-pointer">
               <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-600">Cliquez pour sélectionner une image</p>
-              <p className="text-xs text-gray-500">PNG, JPG jusqu'à 5MB</p>
+              <p className="text-xs text-gray-500">{"PNG, JPG jusqu'à 5MB"}</p>
             </label>
             {selectedImages['campaign'] && (
               <p className="text-sm text-green-600 mt-2">
