@@ -9,7 +9,7 @@ interface CampagnesListProps {
 export async function CampagnesList({ filters }: CampagnesListProps) {
   try {
     // Récupérer toutes les campagnes publiques
-    const campagnes = await CampagnesPublicService.obtenirToutesCampagnesPubliques();
+    const campagnes = await CampagnesPublicService.listerToutesCampagnes();
     
     // Appliquer les filtres côté client
     let filteredCampagnes = campagnes || [];

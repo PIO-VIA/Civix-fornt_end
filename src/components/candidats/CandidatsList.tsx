@@ -1,3 +1,5 @@
+'use client';
+
 import { CandidatsPublicService } from '@/lib/services/CandidatsPublicService';
 import { CandidatCard } from './CandidatCard';
 import type { CandidatFilters } from '@/types';
@@ -9,7 +11,7 @@ interface CandidatsListProps {
 export async function CandidatsList({ filters }: CandidatsListProps) {
   try {
     // Récupérer tous les candidats publics
-    const candidats = await CandidatsPublicService.obtenirTousCandidatsPublics();
+    const candidats = await CandidatsPublicService.listerTousCandidats();
     
     // Appliquer les filtres côté client
     let filteredCandidats = candidats || [];

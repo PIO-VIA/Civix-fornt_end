@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Calendar, Users, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';

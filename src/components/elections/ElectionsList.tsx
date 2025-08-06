@@ -9,7 +9,7 @@ interface ElectionsListProps {
 export async function ElectionsList({ filters }: ElectionsListProps) {
   try {
     // Récupérer toutes les élections publiques
-    const elections = await ElectionsService.obtenirElectionsPubliques();
+    const elections = await ElectionsService.listerToutesElections();
     
     // Appliquer les filtres côté client (en production, ceci devrait être fait côté serveur)
     let filteredElections = elections || [];
