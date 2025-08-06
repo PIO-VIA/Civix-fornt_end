@@ -1,0 +1,137 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LogOut, User, Vote } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+interface HeaderProps {
+  isAuthenticated?: boolean;
+  user?: {
+    username?: string;
+    email?: string;
+  };
+}
+
+export function Header({ isAuthenticated = false, user }: HeaderProps) {
+  const pathname = usePathname();
+
+  const publicNavItems = [
+    { href: '/elections', label: 'Élections', icon: Vote },
+    { href: '/candidats', label: 'Candidats', icon: User },
+    { href: '/campagnes', label: 'Campagnes', icon: Vote },
+  ];
+
+  const protectedNavItems = [
+    { href: '/vote', label: 'Voter', icon: Vote },
+    { href: '/resultats', label: 'Résultats', icon: Vote },
+    { href: '/profil', label: 'Profil', icon: User },
+  ];
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      document.cookie = 'civix-token=; Max-Age=0; path=/';
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  return (
+    <header className="bg-white shadow-sm border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="bg-blue-600 text-white p-2 rounded-lg"
+            >
+              <Vote className="w-6 h-6" />
+            </motion.div>
+            <span className="text-xl font-bold text-gray-900">CIVIX</span>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {/* Navigation publique */}
+            {publicNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+
+            {/* Navigation protégée */}
+            {isAuthenticated && (
+              <>
+                <div className="w-px h-6 bg-gray-300" />
+                {protectedNavItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        isActive
+                          ? 'text-blue-600 bg-blue-50'
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+          </nav>
+
+          {/* Actions utilisateur */}
+          <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-700">
+                  Bonjour, {user?.username || user?.email}
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Déconnexion</span>
+                </motion.button>
+              </div>
+            ) : (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/login"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Se connecter
+                </Link>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
