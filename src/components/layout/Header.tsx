@@ -1,20 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, User, Vote } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { logout } from '@/lib/auth/auth';
 
-interface HeaderProps {
-  isAuthenticated?: boolean;
-  user?: {
-    username?: string;
-    email?: string;
-  };
-}
-
-export function Header({ isAuthenticated = false, user }: HeaderProps) {
+export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, refreshAuth } = useAuth();
 
   const publicNavItems = [
     { href: '/elections', label: 'Élections', icon: Vote },
@@ -30,9 +26,9 @@ export function Header({ isAuthenticated = false, user }: HeaderProps) {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      document.cookie = 'civix-token=; Max-Age=0; path=/';
-      window.location.href = '/';
+      await logout();
+      refreshAuth();
+      router.push('/');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }

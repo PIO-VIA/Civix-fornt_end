@@ -3,7 +3,7 @@
 import { Mail, User, Calendar, Shield } from 'lucide-react';
 
 interface ProfilInfoProps {
-  user: {
+  user?: {
     externalIdElecteur: string;
     username?: string;
     email?: string;
@@ -22,7 +22,7 @@ export function ProfilInfo({ user }: ProfilInfoProps) {
           </label>
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
             <span className="text-gray-900">
-              {user.username || 'Non défini'}
+              {user?.username || 'Non défini'}
             </span>
           </div>
         </div>
@@ -34,7 +34,7 @@ export function ProfilInfo({ user }: ProfilInfoProps) {
           </label>
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
             <span className="text-gray-900">
-              {user.email || 'Non définie'}
+              {user?.email || 'Non définie'}
             </span>
           </div>
         </div>
@@ -48,7 +48,7 @@ export function ProfilInfo({ user }: ProfilInfoProps) {
         </label>
         <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
           <code className="text-sm text-gray-900 font-mono">
-            {user.externalIdElecteur}
+            {user?.externalIdElecteur || 'Non disponible'}
           </code>
         </div>
       </div>

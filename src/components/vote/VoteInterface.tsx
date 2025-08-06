@@ -9,7 +9,7 @@ interface VoteInterfaceProps {
     externalIdElecteur: string;
     username?: string;
     email?: string;
-  };
+  } | null;
 }
 
 export function VoteInterface({ user }: VoteInterfaceProps) {

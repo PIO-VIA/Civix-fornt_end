@@ -1,31 +1,35 @@
+'use client';
+
 import { Suspense } from 'react';
-import { requireAuth } from '@/lib/auth/auth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { VoteInterface } from '@/components/vote/VoteInterface';
 import { ElectionsActives } from '@/components/vote/ElectionsActives';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { Vote, Shield, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
-export default async function VotePage() {
-  const user = await requireAuth();
+export default function VotePage() {
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <div className="bg-blue-600 text-white p-3 rounded-lg mr-4">
-              <Vote className="w-8 h-8" />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="bg-blue-600 text-white p-3 rounded-lg mr-4">
+                <Vote className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Espace de Vote
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Bonjour {user?.username || user?.email}, exercez votre droit de vote en toute sécurité
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Espace de Vote
-              </h1>
-              <p className="text-lg text-gray-600">
-                Bonjour {user.username || user.email}, exercez votre droit de vote en toute sécurité
-              </p>
-            </div>
-          </div>
 
           {/* Informations de sécurité */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -58,7 +62,7 @@ export default async function VotePage() {
         <div className="space-y-8">
           {/* Élections actives */}
           <Suspense fallback={<LoadingSkeleton count={3} />}>
-            <ElectionsActives userId={user.externalIdElecteur} />
+            <ElectionsActives userId={user?.externalIdElecteur || ''} />
           </Suspense>
 
           {/* Interface de vote détaillée */}
@@ -67,11 +71,6 @@ export default async function VotePage() {
           </Suspense>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
-
-export const metadata = {
-  title: 'Vote - CIVIX',
-  description: 'Exercez votre droit de vote de manière sécurisée sur CIVIX',
-};

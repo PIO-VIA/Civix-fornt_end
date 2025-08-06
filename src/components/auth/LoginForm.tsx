@@ -34,25 +34,15 @@ export function LoginForm() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const { login } = await import('@/lib/auth/auth');
+      const result = await login({
+        email: data.email,
+        motDePasse: data.password,
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        // Connexion réussie
-        if (result.mustChangePassword) {
-          // Redirection vers changement de mot de passe
-          router.push('/change-password');
-        } else {
-          // Redirection vers le tableau de bord
-          router.push('/vote');
-        }
+      if (result.success) {
+        // Connexion réussie, recharger la page pour actualiser le contexte d'auth
+        window.location.href = result.mustChangePassword ? '/change-password' : '/vote';
       } else {
         setError(result.error || 'Erreur de connexion');
       }

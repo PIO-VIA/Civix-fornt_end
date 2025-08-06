@@ -1,17 +1,21 @@
+'use client';
+
 import { Suspense } from 'react';
-import { requireAuth } from '@/lib/auth/auth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProfilInfo } from '@/components/profil/ProfilInfo';
 import { HistoriqueVotes } from '@/components/profil/HistoriqueVotes';
 import { ChangePasswordForm } from '@/components/profil/ChangePasswordForm';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { User, History, Key } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
-export default async function ProfilPage() {
-  const user = await requireAuth();
+export default function ProfilPage() {
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
@@ -41,7 +45,7 @@ export default async function ProfilPage() {
               </div>
               <div className="p-6">
                 <Suspense fallback={<LoadingSkeleton count={1} />}>
-                  <ProfilInfo user={user} />
+                  <ProfilInfo user={user || undefined} />
                 </Suspense>
               </div>
             </div>
@@ -56,7 +60,7 @@ export default async function ProfilPage() {
               </div>
               <div className="p-6">
                 <Suspense fallback={<LoadingSkeleton count={3} />}>
-                  <HistoriqueVotes userId={user.externalIdElecteur} />
+                  <HistoriqueVotes userId={user?.externalIdElecteur || ''} />
                 </Suspense>
               </div>
             </div>
@@ -80,11 +84,6 @@ export default async function ProfilPage() {
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
-
-export const metadata = {
-  title: 'Mon Profil - CIVIX',
-  description: 'Gérez votre profil électeur et consultez votre historique de vote sur CIVIX',
-};

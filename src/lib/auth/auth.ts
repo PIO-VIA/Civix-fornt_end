@@ -1,9 +1,5 @@
-import { jwtVerify, SignJWT } from 'jose';
-import { cookies } from 'next/headers';
 import { AuthentificationService } from '../services/AuthentificationService';
-import type { LoginRequest } from '../models/LoginRequest';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
+import type { LoginRequest, AuthResponse } from '../models';
 
 export interface AuthUser {
   externalIdElecteur: string;
@@ -12,19 +8,23 @@ export interface AuthUser {
   mustChangePassword?: boolean;
 }
 
-export async function login(credentials: LoginRequest) {
+// Clé pour le localStorage
+const TOKEN_KEY = 'civix-token';
+const USER_KEY = 'civix-user';
+
+export async function login(credentials: LoginRequest): Promise<{
+  success: boolean;
+  user?: AuthUser;
+  mustChangePassword?: boolean;
+  error?: string;
+}> {
   try {
     const response = await AuthentificationService.loginElecteur(credentials);
     
     if (response.token && response.electeur) {
-      // Stocker le token dans les cookies
-      const cookieStore = await cookies();
-      cookieStore.set('civix-token', response.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 // 24 heures
-      });
+      // Stocker le token et les informations utilisateur dans localStorage
+      localStorage.setItem(TOKEN_KEY, response.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(response.electeur));
 
       return {
         success: true,
@@ -39,39 +39,49 @@ export async function login(credentials: LoginRequest) {
       error: 'Identifiants invalides'
     };
   }
+
+  return {
+    success: false,
+    error: 'Erreur de connexion'
+  };
 }
 
-export async function logout() {
+export async function logout(): Promise<void> {
   try {
     await AuthentificationService.logout();
   } catch (error) {
     console.error('Erreur de déconnexion:', error);
   } finally {
-    const cookieStore = await cookies();
-    cookieStore.delete('civix-token');
+    // Nettoyer le localStorage
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }
 }
 
-export async function getUser(): Promise<AuthUser | null> {
+export function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function getUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  
+  const userData = localStorage.getItem(USER_KEY);
+  if (!userData) return null;
+  
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('civix-token')?.value;
-
-    if (!token) return null;
-
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as AuthUser;
+    return JSON.parse(userData);
   } catch (error) {
+    console.error('Erreur parsing user data:', error);
     return null;
   }
 }
 
-export async function requireAuth(): Promise<AuthUser> {
-  const user = await getUser();
-  
-  if (!user) {
-    throw new Error('Non authentifié');
-  }
-  
-  return user;
+export function isAuthenticated(): boolean {
+  return getToken() !== null && getUser() !== null;
+}
+
+export function clearAuth(): void {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
 }

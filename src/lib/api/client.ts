@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { OpenAPI } from '../core/OpenAPI';
+import { getToken, clearAuth } from '../auth/auth';
 
 // Configuration de l'API client
 export const apiClient = axios.create({
@@ -13,19 +14,15 @@ export const apiClient = axios.create({
 // Configuration OpenAPI
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
-// Intercepteur pour ajouter le token JWT
+// Intercepteur pour ajouter le token JWT depuis localStorage
 apiClient.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('civix-token='))
-      ?.split('=')[1];
-    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      OpenAPI.TOKEN = token;
-    }
+  const token = getToken();
+  
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    OpenAPI.TOKEN = token;
   }
+  
   return config;
 });
 
@@ -34,12 +31,21 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expiré, rediriger vers login
+      // Token expiré ou invalide, nettoyer et rediriger
       if (typeof window !== 'undefined') {
-        document.cookie = 'civix-token=; Max-Age=0; path=/';
+        clearAuth();
         window.location.href = '/login';
       }
     }
     return Promise.reject(error);
   }
 );
+
+// Fonction utilitaire pour configurer le token OpenAPI
+export function setApiToken(token: string | null) {
+  if (token) {
+    OpenAPI.TOKEN = token;
+  } else {
+    OpenAPI.TOKEN = undefined;
+  }
+}

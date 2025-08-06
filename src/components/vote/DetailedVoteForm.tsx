@@ -15,7 +15,7 @@ interface DetailedVoteFormProps {
     externalIdElecteur: string;
     username?: string;
     email?: string;
-  };
+  } | null;
 }
 
 export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
@@ -68,8 +68,16 @@ export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
 
     try {
       // Prévisualiser le vote
+      const { getToken } = await import('@/lib/auth/auth');
+      const token = getToken();
+      
+      if (!token) {
+        setError('Token d\'authentification manquant');
+        return;
+      }
+
       const previewResponse = await VoteService.previsualiserVote(
-        `Bearer ${localStorage.getItem('token')}`,
+        `Bearer ${token}`,
         selectedCandidat
       );
 
@@ -91,8 +99,16 @@ export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
     setError('');
 
     try {
+      const { getToken } = await import('@/lib/auth/auth');
+      const token = getToken();
+      
+      if (!token) {
+        setError('Token d\'authentification manquant');
+        return;
+      }
+
       const voteResponse = await VoteService.voterPourCandidat(
-        `Bearer ${localStorage.getItem('token')}`,
+        `Bearer ${token}`,
         selectedCandidat
       );
 

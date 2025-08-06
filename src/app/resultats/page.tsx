@@ -1,15 +1,19 @@
+'use client';
+
 import { Suspense } from 'react';
-import { requireAuth } from '@/lib/auth/auth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ResultatsList } from '@/components/resultats/ResultatsList';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { BarChart3, TrendingUp, Users } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
-export default async function ResultatsPage() {
-  const user = await requireAuth();
+export default function ResultatsPage() {
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
@@ -66,16 +70,12 @@ export default async function ResultatsPage() {
           </div>
         </div>
 
-        {/* Liste des résultats */}
-        <Suspense fallback={<LoadingSkeleton count={4} />}>
-          <ResultatsList userId={user.externalIdElecteur} />
-        </Suspense>
+          {/* Liste des résultats */}
+          <Suspense fallback={<LoadingSkeleton count={4} />}>
+            <ResultatsList userId={user?.externalIdElecteur || ''} />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
-
-export const metadata = {
-  title: 'Résultats - CIVIX',
-  description: 'Consultez les résultats des élections en temps réel sur CIVIX',
-};
