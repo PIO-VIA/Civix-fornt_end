@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, User, Vote } from 'lucide-react';
+import { LogOut, User, Vote, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { logout } from '@/lib/auth/auth';
@@ -13,6 +13,7 @@ export function Header() {
   const { user, isAuthenticated, refreshAuth } = useAuth();
 
   const publicNavItems = [
+    { href: '/explore', label: 'Explorer', icon: Compass },
     { href: '/elections', label: 'Élections', icon: Vote },
     { href: '/candidats', label: 'Candidats', icon: User },
     { href: '/campagnes', label: 'Campagnes', icon: Vote },
