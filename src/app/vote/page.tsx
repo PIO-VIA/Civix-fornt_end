@@ -71,6 +71,7 @@ export default function VotePage() {
           </Suspense>
         </div>
       </div>
+    </div>
     </ProtectedRoute>
   );
 }

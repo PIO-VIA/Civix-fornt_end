@@ -63,7 +63,7 @@ export async function CandidatsList({ filters }: CandidatsListProps) {
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
         <p className="text-gray-600">
-          Une erreur s'est produite lors du chargement des candidats.
+          {"Une erreur s'est produite lors du chargement des candidats."}
         </p>
       </div>
     );
