@@ -5,6 +5,7 @@
 export type CreateElectionRequest = {
     titre: string;
     description?: string;
+    photo?: string;
     dateDebut: string;
     dateFin: string;
     dateDebutValidite?: string;

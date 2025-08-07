@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Candidat } from './Candidat';
+import type { CandidatSummaryDTO } from './CandidatSummaryDTO';
 export type CampagneDTO = {
     description?: string;
     photo?: string;
-    candidat?: Candidat;
+    candidat?: CandidatSummaryDTO;
     externalIdCampagne?: string;
 };
 

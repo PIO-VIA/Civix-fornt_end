@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UpdateCandidatRequest = {
+export type CandidatSummaryDTO = {
+    externalIdCandidat?: string;
     username?: string;
-    description?: string;
-    photo?: string;
 };
 

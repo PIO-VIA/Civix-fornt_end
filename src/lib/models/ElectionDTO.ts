@@ -6,6 +6,7 @@ export type ElectionDTO = {
     externalIdElection?: string;
     titre?: string;
     description?: string;
+    photo?: string;
     dateDebut?: string;
     dateFin?: string;
     dateDebutValidite?: string;

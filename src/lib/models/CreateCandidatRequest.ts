@@ -4,5 +4,7 @@
 /* eslint-disable */
 export type CreateCandidatRequest = {
     username: string;
+    description?: string;
+    photo?: string;
 };
 
