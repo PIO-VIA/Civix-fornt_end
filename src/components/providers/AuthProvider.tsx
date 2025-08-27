@@ -1,50 +1,75 @@
+
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { getUser, getToken, isAuthenticated } from '@/lib/auth/auth';
-import { setApiToken } from '@/lib/api/client';
-import type { AuthUser } from '@/lib/auth/auth';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { login as apiLogin, logout as apiLogout, getUser, AuthUser } from '@/lib/auth/auth';
+import { LecteurService, LoginRequest } from '@/lib';
+import { usePathname, useRouter } from 'next/navigation';
+
+// Initialise la configuration de l'API client
+import '@/lib/api/client';
 
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  refreshAuth: () => void;
+  login: (credentials: LoginRequest) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  refreshAuth: () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const refreshAuth = () => {
-    const currentUser = getUser();
-    const token = getToken();
-    
-    setUser(currentUser);
-    setApiToken(token);
+  // Vérifie la session au chargement de l'application
+  const verifySession = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Tente de récupérer le profil de l'électeur depuis le serveur
+      const currentUser = await LecteurService.getApiLecteurProfil();
+      setUser(currentUser);
+    } catch (error) {
+      // Si l'appel échoue (ex: 401), l'utilisateur n'est pas connecté
+      setUser(null);
+    }
     setIsLoading(false);
-  };
-
-  useEffect(() => {
-    refreshAuth();
   }, []);
 
-  const contextValue: AuthContextType = {
-    user,
-    isAuthenticated: isAuthenticated(),
-    isLoading,
-    refreshAuth,
+  useEffect(() => {
+    verifySession();
+  }, []);
+
+  const login = async (credentials: LoginRequest) => {
+    const loggedInUser = await apiLogin(credentials);
+    setUser(loggedInUser);
+    // Redirige vers la page de vote après connexion réussie
+    router.push('/vote');
   };
 
+  const logout = async () => {
+    await apiLogout();
+    setUser(null);
+    // Redirige vers la page de connexion après déconnexion
+    router.push('/login');
+  };
+
+  const isAuthenticated = !!user;
+
+  // Pendant le chargement initial, on peut choisir de ne rien afficher ou un loader
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -52,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

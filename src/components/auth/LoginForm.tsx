@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide').min(1, 'Email requis'),
@@ -16,9 +16,9 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const {
@@ -30,27 +30,18 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     setError('');
-
     try {
-      const { login } = await import('@/lib/auth/auth');
-      const result = await login({
+      await login({
         email: data.email,
         motDePasse: data.password,
       });
-
-      if (result.success) {
-        // Connexion réussie, recharger la page pour actualiser le contexte d'auth
-        window.location.href = result.mustChangePassword ? '/change-password' : '/vote';
-      } else {
-        setError(result.error || 'Erreur de connexion');
-      }
-    } catch (error) {
-      console.error('Erreur de connexion:', error);
-      setError('Une erreur est survenue lors de la connexion');
-    } finally {
-      setIsLoading(false);
+      // La redirection est gérée dans le AuthProvider
+    } catch (err: any) {
+      const errorMessage = err.body?.message || err.message || 'Une erreur est survenue.';
+      setError(errorMessage);
+      setIsSubmitting(false);
     }
   };
 
@@ -73,7 +64,7 @@ export function LoginForm() {
               errors.email ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="votre@email.com"
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
         </div>
         {errors.email && (
@@ -101,13 +92,13 @@ export function LoginForm() {
               errors.password ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Votre mot de passe"
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           <button
             type="button"
             className="absolute inset-y-0 right-0 pr-3 flex items-center"
             onClick={() => setShowPassword(!showPassword)}
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             {showPassword ? (
               <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -143,12 +134,12 @@ export function LoginForm() {
       {/* Bouton de connexion */}
       <motion.button
         type="submit"
-        disabled={isLoading}
+        disabled={isSubmitting}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? (
+        {isSubmitting ? (
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             Connexion...
