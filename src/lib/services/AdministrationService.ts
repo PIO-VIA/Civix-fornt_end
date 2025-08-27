@@ -7,15 +7,91 @@ import type { CandidatDTO } from '../models/CandidatDTO';
 import type { CreateCampagneRequest } from '../models/CreateCampagneRequest';
 import type { CreateCandidatRequest } from '../models/CreateCandidatRequest';
 import type { CreateElecteurAdminRequest } from '../models/CreateElecteurAdminRequest';
+import type { CreateElectionRequest } from '../models/CreateElectionRequest';
 import type { ElecteurDTO } from '../models/ElecteurDTO';
+import type { ElectionDTO } from '../models/ElectionDTO';
 import type { StatistiquesAdminDTO } from '../models/StatistiquesAdminDTO';
 import type { UpdateCampagneRequest } from '../models/UpdateCampagneRequest';
 import type { UpdateCandidatRequest } from '../models/UpdateCandidatRequest';
 import type { UpdateElecteurRequest } from '../models/UpdateElecteurRequest';
+import type { UpdateElectionRequest } from '../models/UpdateElectionRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AdministrationService {
+    /**
+     * Détails d'une élection
+     * Obtenir les détails d'une élection spécifique
+     * @param authorization
+     * @param electionId
+     * @returns ElectionDTO OK
+     * @throws ApiError
+     */
+    public static obtenirElection(
+        authorization: string,
+        electionId: string,
+    ): CancelablePromise<ElectionDTO> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/admin/elections/{electionId}',
+            path: {
+                'electionId': electionId,
+            },
+            headers: {
+                'Authorization': authorization,
+            },
+        });
+    }
+    /**
+     * Modifier une élection
+     * Modifier une élection existante
+     * @param authorization
+     * @param electionId
+     * @param requestBody
+     * @returns ElectionDTO OK
+     * @throws ApiError
+     */
+    public static modifierElection(
+        authorization: string,
+        electionId: string,
+        requestBody: UpdateElectionRequest,
+    ): CancelablePromise<ElectionDTO> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/admin/elections/{electionId}',
+            path: {
+                'electionId': electionId,
+            },
+            headers: {
+                'Authorization': authorization,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Supprimer une élection
+     * Supprimer une élection
+     * @param authorization
+     * @param electionId
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static supprimerElection(
+        authorization: string,
+        electionId: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/admin/elections/{electionId}',
+            path: {
+                'electionId': electionId,
+            },
+            headers: {
+                'Authorization': authorization,
+            },
+        });
+    }
     /**
      * Obtenir électeur
      * Obtenir les détails d'un électeur
@@ -187,6 +263,46 @@ export class AdministrationService {
             headers: {
                 'Authorization': authorization,
             },
+        });
+    }
+    /**
+     * Lister les élections
+     * Obtenir la liste de toutes les élections
+     * @param authorization
+     * @returns ElectionDTO OK
+     * @throws ApiError
+     */
+    public static listerElections(
+        authorization: string,
+    ): CancelablePromise<Array<ElectionDTO>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/admin/elections',
+            headers: {
+                'Authorization': authorization,
+            },
+        });
+    }
+    /**
+     * Créer une élection
+     * Créer une nouvelle élection
+     * @param authorization
+     * @param requestBody
+     * @returns ElectionDTO OK
+     * @throws ApiError
+     */
+    public static creerElection(
+        authorization: string,
+        requestBody: CreateElectionRequest,
+    ): CancelablePromise<ElectionDTO> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/admin/elections',
+            headers: {
+                'Authorization': authorization,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

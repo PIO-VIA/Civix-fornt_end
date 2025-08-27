@@ -118,6 +118,7 @@ export { AuthentificationService } from './services/AuthentificationService';
 export { CampagnesPublicService } from './services/CampagnesPublicService';
 export { CandidatsPublicService } from './services/CandidatsPublicService';
 export { ElectionsService } from './services/ElectionsService';
+export { FileControllerService } from './services/FileControllerService';
 export { LecteurService } from './services/LecteurService';
 export { PublicService } from './services/PublicService';
 export { RapportsService } from './services/RapportsService';

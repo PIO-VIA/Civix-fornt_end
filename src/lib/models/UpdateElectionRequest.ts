@@ -8,8 +8,6 @@ export type UpdateElectionRequest = {
     photo?: string;
     dateDebut?: string;
     dateFin?: string;
-    dateDebutValidite?: string;
-    dateFinValidite?: string;
     statut?: UpdateElectionRequest.statut;
     autoriserVoteMultiple?: boolean;
     nombreMaxVotesParElecteur?: number;

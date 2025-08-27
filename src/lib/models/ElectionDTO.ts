@@ -9,13 +9,9 @@ export type ElectionDTO = {
     photo?: string;
     dateDebut?: string;
     dateFin?: string;
-    dateDebutValidite?: string;
-    dateFinValidite?: string;
     statut?: ElectionDTO.statut;
     dateCreation?: string;
     dateModification?: string;
-    administrateurId?: string;
-    administrateurNom?: string;
     autoriserVoteMultiple?: boolean;
     nombreMaxVotesParElecteur?: number;
     resultatsVisibles?: boolean;
