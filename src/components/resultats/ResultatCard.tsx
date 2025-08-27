@@ -8,7 +8,6 @@ import type { ElectionDTO, ResultatsElectionDTO } from '@/types';
 interface ResultatCardProps {
   election: ElectionDTO;
   resultats: ResultatsElectionDTO | null;
-  userId: string;
 }
 
 const formatDate = (dateString?: string) => {
@@ -25,7 +24,7 @@ const calculatePercentage = (votes: number, total: number) => {
   return ((votes / total) * 100).toFixed(1);
 };
 
-export function ResultatCard({ election, resultats, userId }: ResultatCardProps) {
+export function ResultatCard({ election, resultats }: ResultatCardProps) {
   const totalVotes = election.nombreVotes || 0;
   const participation = election.nombreElecteursInscrits 
     ? ((totalVotes / election.nombreElecteursInscrits) * 100).toFixed(1)

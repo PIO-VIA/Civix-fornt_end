@@ -10,7 +10,6 @@ interface CandidatCardProps {
 }
 
 export function CandidatCard({ candidat }: CandidatCardProps) {
-  const nombreVotes = candidat.votes?.length || 0;
   const nombreCampagnes = candidat.campagnes?.length || 0;
 
   return (
@@ -45,11 +44,7 @@ export function CandidatCard({ candidat }: CandidatCardProps) {
 
         {/* Statistiques */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-semibold text-gray-900">{nombreVotes}</div>
-            <div className="text-xs text-gray-600">Votes reçus</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
+          <div className="text-center p-3 bg-gray-50 rounded-lg col-span-2">
             <div className="text-lg font-semibold text-gray-900">{nombreCampagnes}</div>
             <div className="text-xs text-gray-600">Campagnes</div>
           </div>

@@ -4,15 +4,9 @@ import { useSearchParams } from 'next/navigation';
 import { DetailedVoteForm } from './DetailedVoteForm';
 import { Info } from 'lucide-react';
 
-interface VoteInterfaceProps {
-  user: {
-    externalIdElecteur: string;
-    username?: string;
-    email?: string;
-  } | null;
-}
+interface VoteInterfaceProps {}
 
-export function VoteInterface({ user }: VoteInterfaceProps) {
+export function VoteInterface({}: VoteInterfaceProps) {
   const searchParams = useSearchParams();
   const electionId = searchParams.get('election');
 
@@ -39,7 +33,7 @@ export function VoteInterface({ user }: VoteInterfaceProps) {
       <h2 className="text-xl font-semibold text-gray-900">
         Interface de vote détaillée
       </h2>
-      <DetailedVoteForm electionId={electionId} user={user} />
+      <DetailedVoteForm electionId={electionId} />
     </div>
   );
 }

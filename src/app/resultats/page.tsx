@@ -72,7 +72,7 @@ export default function ResultatsPage() {
 
           {/* Liste des résultats */}
           <Suspense fallback={<LoadingSkeleton count={4} />}>
-            <ResultatsList userId={user?.externalIdElecteur || ''} />
+            <ResultatsList />
           </Suspense>
         </div>
       </div>

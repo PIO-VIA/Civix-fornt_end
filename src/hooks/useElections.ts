@@ -5,6 +5,6 @@ import { ElectionsService, ElectionDTO } from '@/lib';
 export const useElections = () => {
   return useQuery<ElectionDTO[], Error>({
     queryKey: ['elections'],
-    queryFn: () => ElectionsService.getAllElections(),
+    queryFn: () => ElectionsService.listerToutesElections(),
   });
 };

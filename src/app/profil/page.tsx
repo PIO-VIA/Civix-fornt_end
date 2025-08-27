@@ -60,7 +60,7 @@ export default function ProfilPage() {
               </div>
               <div className="p-6">
                 <Suspense fallback={<LoadingSkeleton count={3} />}>
-                  <HistoriqueVotes userId={user?.externalIdElecteur || ''} />
+                  <HistoriqueVotes />
                 </Suspense>
               </div>
             </div>

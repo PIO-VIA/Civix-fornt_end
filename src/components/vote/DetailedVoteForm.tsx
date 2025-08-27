@@ -1,130 +1,77 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle2, User, Vote, AlertTriangle, ArrowRight } from 'lucide-react';
-import { ElectionsService } from '@/lib/services/ElectionsService';
-import { VoteService } from '@/lib/services/VoteService';
-import { CandidatsPublicService } from '@/lib/services/CandidatsPublicService';
-import type { ElectionDTO, CandidatDTO } from '@/types';
+import { VoteService, ElectionDTO, CandidatDTO, ElectionsService, CandidatsPublicService } from '@/lib';
+import { useState } from 'react';
 
 interface DetailedVoteFormProps {
   electionId: string;
-  user: {
-    externalIdElecteur: string;
-    username?: string;
-    email?: string;
-  } | null;
 }
 
-export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
-  const router = useRouter();
-  const [election, setElection] = useState<ElectionDTO | null>(null);
-  const [candidats, setCandidats] = useState<CandidatDTO[]>([]);
-  const [selectedCandidat, setSelectedCandidat] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isVoting, setIsVoting] = useState(false);
-  const [error, setError] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
-
-  useEffect(() => {
-    loadElectionData();
-  }, [electionId]);
-
-  const loadElectionData = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Charger les détails de l'élection
-      const electionData = await ElectionsService.obtenirElection(electionId);
-      setElection(electionData);
-
-      // Charger les candidats participants
-      if (electionData.candidatsParticipants && electionData.candidatsParticipants.length > 0) {
-        const candidatsData = await Promise.all(
-          electionData.candidatsParticipants.map(candidatId => 
-            CandidatsPublicService.obtenirCandidatPublic(candidatId)
+// Hook pour charger les données de l'élection et des candidats
+const useElectionData = (electionId: string) => {
+  return useQuery<{
+    election: ElectionDTO;
+    candidats: CandidatDTO[];
+  }, Error>({
+    queryKey: ['election', electionId],
+    queryFn: async () => {
+      const election = await ElectionsService.getApiElections1(electionId);
+      let candidats: CandidatDTO[] = [];
+      if (election.candidats && election.candidats.length > 0) {
+        candidats = await Promise.all(
+          election.candidats.map(candidatId => 
+            CandidatsPublicService.getApiCandidats(candidatId)
           )
         );
-        setCandidats(candidatsData.filter(Boolean));
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des données:', error);
-      setError('Erreur lors du chargement des données de l\'élection');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return { election, candidats: candidats.filter(Boolean) };
+    },
+    enabled: !!electionId, // La requête ne s'exécute que si electionId est présent
+  });
+};
 
-  const handleVoteSubmit = async () => {
-    if (!selectedCandidat) {
-      setError('Veuillez sélectionner un candidat');
-      return;
-    }
+export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [selectedCandidat, setSelectedCandidat] = useState<string>('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-    setIsVoting(true);
-    setError('');
+  const { data, isLoading, error: queryError } = useElectionData(electionId);
+  const { election, candidats = [] } = data || {};
 
-    try {
-      // Prévisualiser le vote
-      const { getToken } = await import('@/lib/auth/auth');
-      const token = getToken();
+  const voteMutation = useMutation({
+    mutationFn: (candidatId: string) => {
+      // Plus besoin de passer le token, le cookie httpOnly est envoyé automatiquement
+      return VoteService.postApiVote({
+        idCandidat: candidatId,
+        idElection: electionId
+      });
+    },
+    onSuccess: () => {
+      // Invalider les requêtes pour que les données soient rafraîchies (ex: statut de vote)
+      queryClient.invalidateQueries({ queryKey: ['electionsActives'] });
+      queryClient.invalidateQueries({ queryKey: ['election', electionId] });
       
-      if (!token) {
-        setError('Token d\'authentification manquant');
-        return;
-      }
+      // Rediriger vers une page de confirmation
+      router.push(`/resultats?vote=success&election=${election?.titre}`);
+    },
+  });
 
-      const previewResponse = await VoteService.previsualiserVote(
-        `Bearer ${token}`,
-        selectedCandidat
-      );
-
-      if (previewResponse.success) {
-        setShowConfirmation(true);
-      } else {
-        setError('Erreur lors de la prévisualisation du vote');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la prévisualisation:', error);
-      setError('Erreur lors de la prévisualisation du vote');
-    } finally {
-      setIsVoting(false);
-    }
+  const handleVoteSubmit = () => {
+    if (!selectedCandidat) return;
+    // Affiche l'étape de confirmation avant de lancer la mutation
+    setShowConfirmation(true);
   };
 
-  const confirmVote = async () => {
-    setIsVoting(true);
-    setError('');
-
-    try {
-      const { getToken } = await import('@/lib/auth/auth');
-      const token = getToken();
-      
-      if (!token) {
-        setError('Token d\'authentification manquant');
-        return;
-      }
-
-      const voteResponse = await VoteService.voterPourCandidat(
-        `Bearer ${token}`,
-        selectedCandidat
-      );
-
-      if (voteResponse.success) {
-        // Rediriger vers la page de confirmation
-        router.push(`/vote/confirmation?election=${electionId}&candidat=${selectedCandidat}`);
-      } else {
-        setError('Erreur lors de l\'enregistrement du vote');
-      }
-    } catch (error) {
-      console.error('Erreur lors du vote:', error);
-      setError('Erreur lors de l\'enregistrement du vote');
-    } finally {
-      setIsVoting(false);
-    }
+  const confirmVote = () => {
+    voteMutation.mutate(selectedCandidat);
   };
+
+  const error = queryError || voteMutation.error;
 
   if (isLoading) {
     return (
@@ -219,7 +166,7 @@ export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
           <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">
               <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
-              <span className="text-sm text-red-700">{error}</span>
+              <span className="text-sm text-red-700">{error.message}</span>
             </div>
           </div>
         )}
@@ -230,10 +177,10 @@ export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleVoteSubmit}
-            disabled={!selectedCandidat || isVoting || candidats.length === 0}
+            disabled={!selectedCandidat || voteMutation.isPending || candidats.length === 0}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
           >
-            {isVoting ? (
+            {voteMutation.isPending ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 Traitement...
@@ -274,10 +221,10 @@ export function DetailedVoteForm({ electionId, user }: DetailedVoteFormProps) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={confirmVote}
-                disabled={isVoting}
+                disabled={voteMutation.isPending}
                 className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 transition-colors flex items-center justify-center"
               >
-                {isVoting ? (
+                {voteMutation.isPending ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Vote en cours...

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { LecteurService, ChangePasswordRequest } from '@/lib';
+import { useEffect } from 'react';
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Mot de passe actuel requis'),
@@ -22,14 +24,10 @@ const changePasswordSchema = z.object({
 
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-export function ChangePasswordForm() {
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+// La méthode générée attend un token, mais nous nous fions au cookie httpOnly.
+const changePasswordService = LecteurService.changerMotDePasse as (req: ChangePasswordRequest) => Promise<string>;
 
+export function ChangePasswordForm() {
   const {
     register,
     handleSubmit,
@@ -39,43 +37,33 @@ export function ChangePasswordForm() {
     resolver: zodResolver(changePasswordSchema),
   });
 
-  const onSubmit = async (data: ChangePasswordFormData) => {
-    setIsLoading(true);
-    setError('');
-    setSuccess(false);
+  const mutation = useMutation({
+    mutationFn: (data: ChangePasswordRequest) => changePasswordService(data),
+    onSuccess: () => {
+      reset();
+    },
+  });
 
-    try {
-      const response = await fetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccess(true);
-        reset();
-        setTimeout(() => setSuccess(false), 5000);
-      } else {
-        setError(result.error || 'Erreur lors du changement de mot de passe');
-      }
-    } catch (error) {
-      console.error('Erreur changement mot de passe:', error);
-      setError('Une erreur est survenue');
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: ChangePasswordFormData) => {
+    mutation.mutate({
+      ancienMotDePasse: data.currentPassword,
+      nouveauMotDePasse: data.newPassword,
+    });
   };
+
+  // Affiche le message de succès pendant 5 secondes
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      const timer = setTimeout(() => {
+        mutation.reset();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [mutation.isSuccess, mutation.reset]);
 
   return (
     <div className="space-y-6">
-      {success && (
+      {mutation.isSuccess && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,13 +94,13 @@ export function ChangePasswordForm() {
               className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.currentPassword ? 'border-red-300' : 'border-gray-300'
               }`}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             />
             <button
               type="button"
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             >
               {showCurrentPassword ? (
                 <EyeOff className="h-4 w-4 text-gray-400" />
@@ -144,13 +132,13 @@ export function ChangePasswordForm() {
               className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.newPassword ? 'border-red-300' : 'border-gray-300'
               }`}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             />
             <button
               type="button"
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             >
               {showNewPassword ? (
                 <EyeOff className="h-4 w-4 text-gray-400" />
@@ -182,13 +170,13 @@ export function ChangePasswordForm() {
               className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
               }`}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             />
             <button
               type="button"
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-4 w-4 text-gray-400" />
@@ -206,7 +194,7 @@ export function ChangePasswordForm() {
         </div>
 
         {/* Erreur générale */}
-        {error && (
+        {mutation.isError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,7 +202,7 @@ export function ChangePasswordForm() {
           >
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
-              <span className="text-sm text-red-700">{error}</span>
+              <span className="text-sm text-red-700">{mutation.error.message}</span>
             </div>
           </motion.div>
         )}
@@ -222,12 +210,12 @@ export function ChangePasswordForm() {
         {/* Bouton */}
         <motion.button
           type="submit"
-          disabled={isLoading}
+          disabled={mutation.isPending}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? (
+          {mutation.isPending ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               Changement...

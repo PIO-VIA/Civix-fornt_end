@@ -12,10 +12,10 @@ const USER_STORAGE_KEY = 'civix_user';
  * Le token JWT est géré par un cookie httpOnly défini par le serveur.
  */
 export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
-  const authResponse: AuthResponse = await AuthentificationService.postApiAuthLogin(credentials);
+  const authResponse: AuthResponse = await AuthentificationService.loginElecteur(credentials);
   
   // Nous supposons que AuthResponse contient les détails de l'électeur
-  const user = authResponse.electeur;
+  const user = authResponse;
 
   if (!user) {
     throw new Error("Les données de l'électeur ne sont pas présentes dans la réponse d'authentification.");
@@ -31,7 +31,7 @@ export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
 export const logout = async () => {
   try {
     // Appelle l'endpoint de déconnexion du backend (si disponible)
-    await AuthentificationService.postApiAuthLogout();
+    await AuthentificationService.logout();
   } catch (error) {
     console.warn("L'appel à l'API de déconnexion a échoué, mais la déconnexion côté client se poursuit.", error);
   } finally {

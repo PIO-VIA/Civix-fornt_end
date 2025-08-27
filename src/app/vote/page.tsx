@@ -67,7 +67,7 @@ export default function VotePage() {
 
           {/* Interface de vote détaillée */}
           <Suspense fallback={<LoadingSkeleton count={1} />}>
-            <VoteInterface user={user} />
+            <VoteInterface />
           </Suspense>
         </div>
       </div>
