@@ -95,7 +95,7 @@ export function ChangePasswordForm() {
             <input
               {...register('currentPassword')}
               type={showCurrentPassword ? 'text' : 'password'}
-              className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`block w-full pl-10 pr-10 py-2 text-sm border  text-black rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.currentPassword ? 'border-red-300' : 'border-gray-300'
               }`}
               disabled={mutation.isPending}
@@ -133,7 +133,7 @@ export function ChangePasswordForm() {
             <input
               {...register('newPassword')}
               type={showNewPassword ? 'text' : 'password'}
-              className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`block w-full pl-10 pr-10 py-2 text-sm border text-black rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.newPassword ? 'border-red-300' : 'border-gray-300'
               }`}
               disabled={mutation.isPending}
@@ -171,7 +171,7 @@ export function ChangePasswordForm() {
             <input
               {...register('confirmPassword')}
               type={showConfirmPassword ? 'text' : 'password'}
-              className={`block w-full pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`block w-full pl-10 pr-10 py-2 text-sm border text-black rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
               }`}
               disabled={mutation.isPending}

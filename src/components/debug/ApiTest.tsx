@@ -66,7 +66,7 @@ export function ApiTest() {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="p-6 bg-white text-black rounded-lg shadow-sm border border-gray-200">
       <h2 className="text-xl font-bold mb-4">API Test Debug</h2>
       
       <div className="space-y-4">
