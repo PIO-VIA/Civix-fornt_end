@@ -2,7 +2,18 @@
 
 import { useHistoriqueVotes } from '@/hooks';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
-import { Calendar, Vote, CheckCircle2 } from 'lucide-react';
+import { Calendar, CheckCircle2 } from 'lucide-react';
+
+interface Participation {
+  electionId?: string;
+  electionTitre?: string;
+  electionDescription?: string;
+  dateVote?: string;
+}
+
+interface HistoriqueData {
+  participations?: Participation[];
+}
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return 'Date inconnue';
@@ -16,7 +27,11 @@ const formatDate = (dateString?: string) => {
 };
 
 export function HistoriqueVotes() {
-  const { data: historique, isLoading, error } = useHistoriqueVotes();
+  const { data: historique, isLoading, error } = useHistoriqueVotes() as {
+    data: HistoriqueData | undefined;
+    isLoading: boolean;
+    error: Error | null;
+  };
 
   if (isLoading) {
     return <LoadingSkeleton count={3} />;
@@ -24,13 +39,13 @@ export function HistoriqueVotes() {
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-600">
-        <p>Impossible de charger votre historique de vote: {error.message}</p>
+      <div className="text-center py-8 text-red-600" role="alert" aria-live="polite">
+        <p>Impossible de charger votre historique de vote: {error?.message || 'Erreur inconnue'}</p>
       </div>
     );
   }
 
-  if (!historique || !historique.participations || historique.participations.length === 0) {
+  if (!historique?.participations || historique.participations.length === 0) {
     return (
       <div className="text-center py-8">
         <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun vote enregistré</h3>
@@ -42,11 +57,11 @@ export function HistoriqueVotes() {
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-600 mb-4">
-        Vous avez participé à {historique.participations.length} élection(s)
+        Vous avez participé à {historique.participations?.length || 0} élection(s)
       </div>
       
       <div className="space-y-4">
-        {historique.participations.map((participation, index) => (
+        {historique.participations?.map((participation, index) => (
           <div
             key={participation.electionId || index}
             className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -87,7 +102,7 @@ export function HistoriqueVotes() {
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
             <div className="text-lg font-semibold text-blue-600">
-              {historique.participations.length}
+              {historique.participations?.length || 0}
             </div>
             <div className="text-sm text-blue-700">
               Élections

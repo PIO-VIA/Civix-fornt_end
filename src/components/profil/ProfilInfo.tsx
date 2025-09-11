@@ -18,7 +18,7 @@ export function ProfilInfo({ user }: ProfilInfoProps) {
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700 flex items-center">
             <User className="w-4 h-4 mr-2" />
-            Nom d'utilisateur
+            {"Nom d'utilisateur"}
           </label>
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
             <span className="text-gray-900">
@@ -79,7 +79,7 @@ export function ProfilInfo({ user }: ProfilInfoProps) {
             <ul className="text-sm text-blue-700 mt-1 space-y-1">
               <li>• Vos informations personnelles sont protégées</li>
               <li>• Votre historique de vote reste confidentiel</li>
-              <li>• Contactez l'administrateur pour toute modification</li>
+              <li>{"• Contactez l'administrateur pour toute modification"}</li>
             </ul>
           </div>
         </div>

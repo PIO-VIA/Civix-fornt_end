@@ -67,3 +67,10 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+.hero-bg {
+  background-image: url('/assets/vote.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { Eye, EyeOff, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { LecteurService, ChangePasswordRequest } from '@/lib';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Mot de passe actuel requis'),
@@ -28,6 +28,10 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 const changePasswordService = LecteurService.changerMotDePasse as (req: ChangePasswordRequest) => Promise<string>;
 
 export function ChangePasswordForm() {
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
