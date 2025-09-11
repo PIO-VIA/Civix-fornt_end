@@ -31,16 +31,16 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedRoute) {
     if (!token) {
-      // Pas de token, redirection vers la page de connexion
-      return NextResponse.redirect(new URL('/login', request.url));
+      // Pas de token dans les cookies, mais on laisse passer pour que le client-side vérifie
+      // Si l'utilisateur n'est vraiment pas connecté, AuthProvider se chargera de la redirection
+      return NextResponse.next();
     }
 
     const payload = await verifyToken(token);
 
     if (!payload) {
-      // Token invalide, redirection vers la page de connexion
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      // Supprime le cookie invalide
+      // Token invalide, supprime le cookie mais laisse passer pour vérification côté client
+      const response = NextResponse.next();
       response.cookies.delete(TOKEN_COOKIE_NAME);
       return response;
     }

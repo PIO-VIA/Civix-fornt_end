@@ -15,6 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,8 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginRequest) => {
     const loggedInUser = await apiLogin(credentials);
     setUser(loggedInUser);
-    // Redirige vers la page de vote après connexion réussie
-    router.push('/vote');
+    // Redirige vers la page de profil après connexion réussie
+    router.push('/profil');
   };
 
   const logout = async () => {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout, refreshAuth: verifySession }}>
       {children}
     </AuthContext.Provider>
   );
