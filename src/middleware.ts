@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-// 1. Spécifiez les chemins publics et protégés
-const PUBLIC_PATHS = ['/login', '/elections', '/candidats', '/campagnes', '/'];
+// 1. Spécifiez les chemins protégés
 const PROTECTED_PATHS = ['/vote', '/resultats', '/profil'];
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -64,6 +63,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)_',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

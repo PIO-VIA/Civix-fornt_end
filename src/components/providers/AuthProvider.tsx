@@ -2,9 +2,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { login as apiLogin, logout as apiLogout, getUser, AuthUser } from '@/lib/auth/auth';
+import { login as apiLogin, logout as apiLogout, AuthUser } from '@/lib/auth/auth';
 import { LecteurService, LoginRequest } from '@/lib';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 // Initialise la configuration de l'API client
 import '@/lib/api/client';
@@ -23,25 +23,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   // Vérifie la session au chargement de l'application
   const verifySession = useCallback(async () => {
     setIsLoading(true);
     try {
       // Tente de récupérer le profil de l'électeur depuis le serveur
-      const currentUser = await LecteurService.getApiLecteurProfil();
+      // Le token sera automatiquement envoyé via le cookie httpOnly
+      const currentUser = await LecteurService.obtenirMonProfil('');
       setUser(currentUser);
-    } catch (error) {
+    } catch {
       // Si l'appel échoue (ex: 401), l'utilisateur n'est pas connecté
       setUser(null);
+      // Nettoie également le localStorage
+      localStorage.removeItem('civix_user');
     }
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
     verifySession();
-  }, []);
+  }, [verifySession]);
 
   const login = async (credentials: LoginRequest) => {
     const loggedInUser = await apiLogin(credentials);

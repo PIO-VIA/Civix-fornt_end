@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProfilInfo } from '@/components/profil/ProfilInfo';
 import { HistoriqueVotes } from '@/components/profil/HistoriqueVotes';
 import { ChangePasswordForm } from '@/components/profil/ChangePasswordForm';
@@ -10,12 +10,30 @@ import { User, History, Key } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function ProfilPage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
@@ -84,6 +102,6 @@ export default function ProfilPage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

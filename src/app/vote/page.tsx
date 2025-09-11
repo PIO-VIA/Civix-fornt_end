@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { VoteInterface } from '@/components/vote/VoteInterface';
 import { ElectionsActives } from '@/components/vote/ElectionsActives';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
@@ -9,27 +9,45 @@ import { Vote, Shield, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function VotePage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="bg-blue-600 text-white p-3 rounded-lg mr-4">
-                <Vote className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Espace de Vote
-                </h1>
-                <p className="text-lg text-gray-600">
-                  Bonjour {user?.username || user?.email}, exercez votre droit de vote en toute sécurité
-                </p>
-              </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <div className="bg-blue-600 text-white p-3 rounded-lg mr-4">
+              <Vote className="w-8 h-8" />
             </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Espace de Vote
+              </h1>
+              <p className="text-lg text-gray-600">
+                Bonjour {user?.username || user?.email}, exercez votre droit de vote en toute sécurité
+              </p>
+            </div>
+          </div>
 
           {/* Informations de sécurité */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -72,6 +90,5 @@ export default function VotePage() {
         </div>
       </div>
     </div>
-    </ProtectedRoute>
   );
 }

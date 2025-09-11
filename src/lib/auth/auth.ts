@@ -21,6 +21,8 @@ export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
     throw new Error("Les données de l'électeur ne sont pas présentes dans la réponse d'authentification.");
   }
 
+  // Stocker seulement les informations utilisateur, pas le token
+  // Le token sera géré par le cookie httpOnly
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   return user;
 };
@@ -49,7 +51,7 @@ export const getUser = (): AuthUser | null => {
   if (!userJson) return null;
   try {
     return JSON.parse(userJson);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

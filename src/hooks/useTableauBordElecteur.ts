@@ -5,6 +5,6 @@ import { LecteurService, TableauBordElecteurDTO } from '@/lib';
 export const useTableauBordElecteur = () => {
   return useQuery<TableauBordElecteurDTO, Error>({
     queryKey: ['tableauBordElecteur'],
-    queryFn: () => LecteurService.getDashboardElecteur(),
+    queryFn: () => LecteurService.obtenirTableauBord(''),
   });
 };

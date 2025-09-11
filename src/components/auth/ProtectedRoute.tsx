@@ -33,5 +33,5 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
     return null;
   }
 
-  return <>{children}</>;
+  return children;
 }
