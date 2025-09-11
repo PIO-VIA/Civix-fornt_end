@@ -26,8 +26,8 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
         setLoading(true);
         setError(null);
 
-        // Récupérer les élections disponibles
-        const electionsOuvertes = await ElectionsService.listerElectionsDisponibles('');
+        // Récupérer toutes les élections (endpoint public)
+        const electionsOuvertes = await ElectionsService.listerToutesElections();
         
         if (!electionsOuvertes || electionsOuvertes.length === 0) {
           setElections([]);

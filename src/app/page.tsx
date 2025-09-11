@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Vote, Users, Calendar, Shield } from 'lucide-react';
+import { ApiTest } from '@/components/debug/ApiTest';
 
 export default function Home() {
   return (
@@ -92,6 +93,18 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Debug Section - Development only */}
+      {process.env.NODE_ENV === 'development' && (
+        <section className="py-20 px-4 bg-gray-100">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+              🔧 Debug API Test
+            </h2>
+            <ApiTest />
+          </div>
+        </section>
+      )}
 
       {/* Section appel à l'action */}
       <section className="py-20 px-4 bg-blue-600">
