@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({
                   {children}
                 </Suspense>
               </main>
+              <Footer />
             </div>
           </QueryProvider>
         </AuthProvider>

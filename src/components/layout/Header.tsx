@@ -6,6 +6,7 @@ import { LogOut, User, Vote, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { logout } from '@/lib/auth/auth';
+import Image from 'next/image';
 
 export function Header() {
   const pathname = usePathname();
@@ -43,11 +44,17 @@ export function Header() {
           <Link href="/" className="flex items-center space-x-2">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="bg-blue-600 text-white p-2 rounded-lg"
+              className=" text-white p-2 rounded-lg"
             >
-              <Vote className="w-6 h-6" />
+              <Image 
+                src="/assets/logop.png" 
+                alt="CIVIX Logo" 
+                width={80} 
+                height={80} 
+                className="w-10  h-15"
+              />
             </motion.div>
-            <span className="text-xl font-bold text-gray-900">CIVIX</span>
+            <span className="text-xl font-bold text-blue-500">CIVIX</span>
           </Link>
 
           {/* Navigation */}
