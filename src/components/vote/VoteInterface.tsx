@@ -1,14 +1,13 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { DetailedVoteForm } from './DetailedVoteForm';
 import { Info } from 'lucide-react';
 
-interface VoteInterfaceProps {}
+interface VoteInterfaceProps {
+  electionId?: string;
+}
 
-export function VoteInterface({}: VoteInterfaceProps) {
-  const searchParams = useSearchParams();
-  const electionId = searchParams.get('election');
+export function VoteInterface({ electionId }: VoteInterfaceProps) {
 
   if (!electionId) {
     return (

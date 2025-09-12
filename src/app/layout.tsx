@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: "CIVIX - Plateforme de Vote Électronique",
   description: "Plateforme sécurisée de vote électronique pour les citoyens",
   keywords: ["vote", "élection", "démocratie", "civique"],
+  icons: {
+    icon: "/assets/logop.png",
+  },
+  openGraph: {
+    images: ["/assets/logop.png"],
+  },
 };
 
 export default function RootLayout({

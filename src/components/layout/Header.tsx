@@ -54,7 +54,7 @@ export function Header() {
                 className="w-10  h-15"
               />
             </motion.div>
-            <span className="text-xl font-bold text-blue-500">CIVIX</span>
+            <span className="text-xl font-bold text-blue-400">CIVIX</span>
           </Link>
 
           {/* Navigation */}
