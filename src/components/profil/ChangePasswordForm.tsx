@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { LecteurService, ChangePasswordRequest } from '@/lib';
+import { ChangePasswordRequest } from '@/lib';
+import { AuthenticatedLecteurService } from '@/lib/auth/authenticatedServices';
 import { useEffect, useState } from 'react';
 
 const changePasswordSchema = z.object({
@@ -24,8 +25,8 @@ const changePasswordSchema = z.object({
 
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-// La méthode générée attend un token, mais nous nous fions au cookie httpOnly.
-const changePasswordService = LecteurService.changerMotDePasse as (req: ChangePasswordRequest) => Promise<string>;
+// Utilise le service authentifié qui inclut automatiquement le token
+const changePasswordService = AuthenticatedLecteurService.changerMotDePasse;
 
 export function ChangePasswordForm() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);

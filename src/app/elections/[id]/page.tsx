@@ -278,7 +278,7 @@ export default function ElectionPage() {
                             </div>
                             <div>
                               <h3 className="font-semibold text-gray-900">
-                                {candidat.nomCandidat || `Candidat ${index + 1}`}
+                                {candidat.candidatNom || `Candidat ${index + 1}`}
                               </h3>
                               <p className="text-sm text-gray-600">
                                 {candidat.nombreVotes || 0} votes
@@ -287,12 +287,12 @@ export default function ElectionPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-blue-600">
-                              {candidat.pourcentage?.toFixed(1) || '0.0'}%
+                              {candidat.pourcentageVotes?.toFixed(1) || '0.0'}%
                             </div>
                             <div className="w-32 bg-gray-200 rounded-full h-2 mt-1">
                               <div
                                 className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                                style={{ width: `${candidat.pourcentage || 0}%` }}
+                                style={{ width: `${candidat.pourcentageVotes || 0}%` }}
                               />
                             </div>
                           </div>

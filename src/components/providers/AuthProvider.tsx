@@ -3,7 +3,8 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { login as apiLogin, logout as apiLogout, AuthUser } from '@/lib/auth/auth';
-import { LecteurService, LoginRequest } from '@/lib';
+import { LoginRequest } from '@/lib';
+import { AuthenticatedLecteurService } from '@/lib/auth/authenticatedServices';
 import { useRouter } from 'next/navigation';
 
 // Initialise la configuration de l'API client
@@ -30,8 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       // Tente de récupérer le profil de l'électeur depuis le serveur
-      // Le token sera automatiquement envoyé via le cookie httpOnly
-      const currentUser = await LecteurService.obtenirMonProfil('');
+      // Le token sera automatiquement inclus via AuthenticatedLecteurService
+      const currentUser = await AuthenticatedLecteurService.obtenirMonProfil();
       setUser(currentUser);
     } catch {
       // Si l'appel échoue (ex: 401), l'utilisateur n'est pas connecté

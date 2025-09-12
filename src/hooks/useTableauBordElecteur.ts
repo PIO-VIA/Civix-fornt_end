@@ -1,10 +1,11 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { LecteurService, TableauBordElecteurDTO } from '@/lib';
+import { TableauBordElecteurDTO } from '@/lib';
+import { AuthenticatedLecteurService } from '@/lib/auth/authenticatedServices';
 
 export const useTableauBordElecteur = () => {
   return useQuery<TableauBordElecteurDTO, Error>({
     queryKey: ['tableauBordElecteur'],
-    queryFn: () => LecteurService.obtenirTableauBord(''),
+    queryFn: () => AuthenticatedLecteurService.obtenirTableauDeBord(),
   });
 };

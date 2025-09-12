@@ -1,5 +1,6 @@
 
 import { AuthentificationService, LoginRequest, AuthResponse, ElecteurDTO } from '@/lib';
+import { storeAuthInfo, clearAuthInfo } from './apiUtils';
 
 // Le type pour l'utilisateur authentifié, basé sur ElecteurDTO
 export type AuthUser = ElecteurDTO;
@@ -21,9 +22,8 @@ export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
     throw new Error("Les données de l'électeur ne sont pas présentes dans la réponse d'authentification.");
   }
 
-  // Stocker seulement les informations utilisateur, pas le token
-  // Le token sera géré par le cookie httpOnly
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  // Stocker les informations complètes d'authentification (y compris le token)
+  storeAuthInfo(authResponse);
   return user;
 };
 
@@ -38,7 +38,7 @@ export const logout = async () => {
     console.warn("L'appel à l'API de déconnexion a échoué, mais la déconnexion côté client se poursuit.", error);
   } finally {
     // Supprime toujours les données utilisateur du localStorage
-    localStorage.removeItem(USER_STORAGE_KEY);
+    clearAuthInfo();
   }
 };
 
