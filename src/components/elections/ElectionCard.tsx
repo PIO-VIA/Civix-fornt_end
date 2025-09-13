@@ -4,6 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, Users, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { AlertModal } from '@/components/ui/AlertModal';
+import { AuthenticatedVoteService } from '@/lib/auth/authenticatedServices';
 import type { ElectionDTO } from '@/types';
 
 interface ElectionCardProps {
@@ -55,11 +58,46 @@ const formatDate = (dateString?: string) => {
 export function ElectionCard({ election }: ElectionCardProps) {
   const isActive = election.estActive;
   const hasEnded = election.statut === 'TERMINEE';
+  const [showNotEligibleModal, setShowNotEligibleModal] = useState(false);
+  const [canVote, setCanVote] = useState<boolean | null>(null);
+  const [checkingEligibility, setCheckingEligibility] = useState(false);
+  
   const isValidPath = (path?: string) => {
     return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
   };
   
   const electionImage = isValidPath(election.photo) ? election.photo! : '/assets/poduim.jpeg';
+
+  // Fonction pour vérifier l'éligibilité au vote
+  const checkVoteEligibility = async () => {
+    try {
+      setCheckingEligibility(true);
+      const response = await AuthenticatedVoteService.obtenirStatutVote();
+      const eligible = response.peutVoter && !response.avote;
+      setCanVote(eligible || false);
+      return eligible || false;
+    } catch (error) {
+      console.error('Erreur lors de la vérification d\'éligibilité:', error);
+      setCanVote(false);
+      return false;
+    } finally {
+      setCheckingEligibility(false);
+    }
+  };
+
+  // Gérer le clic sur le bouton voter
+  const handleVoteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const eligible = canVote !== null ? canVote : await checkVoteEligibility();
+    
+    if (!eligible) {
+      setShowNotEligibleModal(true);
+    } else {
+      // Rediriger vers la page de vote
+      window.location.href = `/vote?election=${election.externalIdElection}`;
+    }
+  };
 
   return (
     <motion.div
@@ -129,15 +167,25 @@ export function ElectionCard({ election }: ElectionCardProps) {
             </Link>
           )}
           {isActive && (
-            <Link
-              href={`/vote?election=${election.externalIdElection}`}
-              className="bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+            <button
+              onClick={handleVoteClick}
+              disabled={checkingEligibility}
+              className="bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Voter
-            </Link>
+              {checkingEligibility ? 'Vérification...' : 'Voter'}
+            </button>
           )}
         </div>
       </div>
+      
+      {/* Modal d'erreur pour inscription manquante */}
+      <AlertModal
+        isOpen={showNotEligibleModal}
+        onClose={() => setShowNotEligibleModal(false)}
+        title="Non inscrit à cette élection"
+        message="Vous n'êtes pas inscrit à cette élection et ne pouvez donc pas y participer. Veuillez contacter l'administrateur si vous pensez qu'il s'agit d'une erreur."
+        type="error"
+      />
     </motion.div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ElectionsService } from '@/lib/services/ElectionsService';
-import { VoteService } from '@/lib/services/VoteService';
+import { AuthenticatedVoteService } from '@/lib/auth/authenticatedServices';
 import { ElectionVoteCard } from './ElectionVoteCard';
 import { ElectionDTO } from '@/lib';
 
@@ -38,12 +38,10 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
         const electionsAvecStatut = await Promise.all(
           electionsOuvertes.map(async (election) => {
             try {
-              const statutVote = await VoteService.obtenirStatutVote(
-                '' // Le token sera envoyé via cookie httpOnly
-              );
+              const statutVote = await AuthenticatedVoteService.obtenirStatutVote();
               return {
                 ...election,
-                aVote: statutVote.aVote || false,
+                aVote: statutVote.avote || false,
                 peutVoter: statutVote.peutVoter || false
               };
             } catch (err) {

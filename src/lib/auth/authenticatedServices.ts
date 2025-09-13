@@ -97,11 +97,17 @@ export const AuthenticatedVoteService = {
 
   async obtenirStatutVote() {
     const authToken = getAuthHeader();
+    if (!authToken) {
+      throw new Error('Token d\'authentification manquant. Veuillez vous reconnecter.');
+    }
     return VoteService.obtenirStatutVote(authToken);
   },
 
   async verifierPeutVoter() {
     const authToken = getAuthHeader();
+    if (!authToken) {
+      throw new Error('Token d\'authentification manquant. Veuillez vous reconnecter.');
+    }
     return VoteService.verifierPeutVoter(authToken);
   }
 };

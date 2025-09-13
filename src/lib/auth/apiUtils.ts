@@ -28,7 +28,11 @@ export const getAuthorizationToken = (): string | null => {
  */
 export const getAuthHeader = (): string => {
   const token = getAuthorizationToken();
-  return token || '';
+  if (!token) {
+    console.warn('Token d\'authentification non trouvé');
+    return '';
+  }
+  return token;
 };
 
 /**

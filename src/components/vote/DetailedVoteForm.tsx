@@ -29,8 +29,8 @@ const useElectionData = (electionId: string) => {
           )
         );
       }
-      const peutVoterResponse = await AuthenticatedVoteService.verifierPeutVoter();
-      const canVote = peutVoterResponse.peutVoter || false;
+      const statutVoteResponse = await AuthenticatedVoteService.obtenirStatutVote();
+      const canVote = (statutVoteResponse.peutVoter && !statutVoteResponse.avote) || false;
       console.log('Candidats récupérés:', candidats);
       return { election, candidats: candidats || [], canVote };
     },
@@ -78,7 +78,7 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
 
   // Vérifier si l'utilisateur n'est pas éligible et afficher la popup
   useEffect(() => {
-    if (data && !canVote && !data.election?.aVote) {
+    if (data && !canVote) {
       setShowNotEligibleModal(true);
     }
   }, [data, canVote]);
