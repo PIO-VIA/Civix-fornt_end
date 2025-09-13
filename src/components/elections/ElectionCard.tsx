@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, Users, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { ElectionDTO } from '@/types';
@@ -54,23 +55,36 @@ const formatDate = (dateString?: string) => {
 export function ElectionCard({ election }: ElectionCardProps) {
   const isActive = election.estActive;
   const hasEnded = election.statut === 'TERMINEE';
+  const electionImage = election.photo || '/assets/poduim.jpeg';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden"
     >
-      <div className="p-6">
-        {/* Header avec titre et statut */}
-        <div className="flex items-start justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-            {election.titre || 'Sans titre'}
-          </h3>
+      {/* Image de l'élection */}
+      <div className="relative h-48">
+        <Image
+          src={electionImage}
+          alt={election.titre || 'Élection'}
+          fill
+          className="object-cover"
+        />
+        <div className="absolute top-4 right-4">
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatutColor(election.statut)}`}>
             {getStatutLabel(election.statut)}
           </span>
+        </div>
+      </div>
+      
+      <div className="p-6">
+        {/* Header avec titre */}
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+            {election.titre || 'Sans titre'}
+          </h3>
         </div>
 
         {/* Description */}
