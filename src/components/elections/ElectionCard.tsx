@@ -55,7 +55,11 @@ const formatDate = (dateString?: string) => {
 export function ElectionCard({ election }: ElectionCardProps) {
   const isActive = election.estActive;
   const hasEnded = election.statut === 'TERMINEE';
-  const electionImage = election.photo || '/assets/poduim.jpeg';
+  const isValidPath = (path?: string) => {
+    return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
+  };
+  
+  const electionImage = isValidPath(election.photo) ? election.photo! : '/assets/poduim.jpeg';
 
   return (
     <motion.div

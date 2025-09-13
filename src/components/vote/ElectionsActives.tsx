@@ -51,13 +51,19 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
               return {
                 ...election,
                 aVote: false,
-                peutVoter: true
+                peutVoter: false // Par défaut, l'utilisateur ne peut pas voter
               };
             }
           })
         );
 
-        setElections(electionsAvecStatut);
+        // Filtrer pour ne montrer que les élections où l'utilisateur peut voter
+        const electionsEligibles = electionsAvecStatut.filter(election => 
+          election.peutVoter && !election.aVote && 
+          (election.statut === 'OUVERTE' || election.statut === 'EN_COURS')
+        );
+
+        setElections(electionsEligibles);
       } catch (err) {
         console.error('Erreur lors du chargement des élections actives:', err);
         setError('Impossible de charger les élections actives');
@@ -112,10 +118,10 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Aucune élection active
+            Aucune élection disponible
           </h3>
           <p className="text-gray-600">
-            Il n'y a actuellement aucune élection ouverte au vote.
+            Vous n'êtes inscrit à aucune élection ouverte au vote actuellement, ou vous avez déjà voté pour toutes les élections disponibles.
           </p>
         </div>
       </div>

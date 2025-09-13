@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { ElectionsService, AdministrationService } from '@/lib';
+import { PodiumResultats } from '@/components/resultats/PodiumResultats';
 import type { ElectionDTO, ResultatsElectionDTO } from '@/types';
 
 export default function ElectionPage() {
@@ -261,44 +262,73 @@ export default function ElectionPage() {
 
             <div className="p-6">
               {resultats.resultatsParCandidat && resultats.resultatsParCandidat.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="grid gap-4">
-                    {resultats.resultatsParCandidat.map((candidat, index: number) => (
-                      <motion.div
-                        key={candidat.candidatId || index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="border border-gray-200 rounded-lg p-4"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                              <Users className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {candidat.candidatNom || `Candidat ${index + 1}`}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {candidat.nombreVotes || 0} votes
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-blue-600">
-                              {candidat.pourcentageVotes?.toFixed(1) || '0.0'}%
-                            </div>
-                            <div className="w-32 bg-gray-200 rounded-full h-2 mt-1">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                                style={{ width: `${candidat.pourcentageVotes || 0}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                <div className="space-y-6">
+                  {/* Podium des 3 premiers */}
+                  <PodiumResultats 
+                    candidats={resultats.resultatsParCandidat}
+                    totalVotes={resultats.totalVotes || 0}
+                  />
+
+                  {/* Tous les candidats */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                      Résultats détaillés
+                    </h4>
+                    <div className="grid gap-4">
+                      {resultats.resultatsParCandidat
+                        .sort((a, b) => (b.nombreVotes || 0) - (a.nombreVotes || 0))
+                        .map((candidat, index: number) => {
+                          const percentage = candidat.pourcentageVotes || 
+                            ((candidat.nombreVotes || 0) / (resultats.totalVotes || 1) * 100);
+                          
+                          return (
+                            <motion.div
+                              key={candidat.candidatId || index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3, delay: index * 0.1 }}
+                              className={`border rounded-lg p-4 ${
+                                index < 3 
+                                  ? 'border-yellow-200 bg-yellow-50' 
+                                  : 'border-gray-200 bg-white'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                    index < 3 ? 'bg-yellow-100' : 'bg-blue-100'
+                                  }`}>
+                                    <span className="font-bold text-lg">
+                                      {index + 1}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h3 className="font-semibold text-gray-900">
+                                      {candidat.candidat?.username || candidat.candidatNom || `Candidat ${index + 1}`}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                      {candidat.nombreVotes || 0} votes
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold text-blue-600">
+                                    {percentage.toFixed(1)}%
+                                  </div>
+                                  <div className="w-32 bg-gray-200 rounded-full h-2 mt-1">
+                                    <motion.div
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${percentage}%` }}
+                                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                                      className="bg-blue-600 h-2 rounded-full"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                    </div>
                   </div>
 
                   {/* Statistiques générales */}

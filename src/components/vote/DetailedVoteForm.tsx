@@ -4,8 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, User, Vote, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { ElectionDTO, CandidatDTO, ResultatsElectionDTO, ElectionsService, CandidatsPublicService, VoterElectionRequest } from '@/lib';
 import { AuthenticatedElectionsService, AuthenticatedVoteService } from '@/lib/auth/authenticatedServices';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VoteCandidatCard } from './VoteCandidatCard';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 interface DetailedVoteFormProps {
   electionId: string;
@@ -41,6 +42,7 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
   const queryClient = useQueryClient();
   const [selectedCandidat, setSelectedCandidat] = useState<string>('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showNotEligibleModal, setShowNotEligibleModal] = useState(false);
 
   const { data, isLoading, error: queryError } = useElectionData(electionId);
   const { election, candidats = [], canVote = false } = data || {};
@@ -73,6 +75,13 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
   };
 
   const error = queryError || voteMutation.error;
+
+  // Vérifier si l'utilisateur n'est pas éligible et afficher la popup
+  useEffect(() => {
+    if (data && !canVote && !data.election?.aVote) {
+      setShowNotEligibleModal(true);
+    }
+  }, [data, canVote]);
 
   if (isLoading) {
     return (
@@ -185,6 +194,15 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
           </div>
         </div>
       )}
+
+      {/* Modal d'erreur pour inscription manquante */}
+      <AlertModal
+        isOpen={showNotEligibleModal}
+        onClose={() => setShowNotEligibleModal(false)}
+        title="Non inscrit à cette élection"
+        message="Vous n'êtes pas inscrit à cette élection et ne pouvez donc pas y participer. Veuillez contacter l'administrateur si vous pensez qu'il s'agit d'une erreur."
+        type="error"
+      />
     </div>
   );
 }
