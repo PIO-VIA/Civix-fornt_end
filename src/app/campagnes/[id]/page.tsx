@@ -115,6 +115,12 @@ export default function CampagnePage() {
   const candidat = campagne.candidat;
   const election = campagne.election;
 
+  const isValidPath = (path?: string) => {
+    return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
+  };
+  
+  const campagneImage = isValidPath(campagneInfo.photo) ? campagneInfo.photo! : '/assets/poduim.jpeg';
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header avec navigation */}
@@ -140,20 +146,14 @@ export default function CampagnePage() {
           transition={{ duration: 0.5 }}
           className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8"
         >
-          {/* Banner de la campagne */}
-          <div className="h-48 bg-gradient-to-br from-purple-400 to-purple-600 relative">
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="flex items-end justify-between">
-                <div className="text-white">
-                  <h1 className="text-3xl font-bold mb-2">{campagneInfo.nom || 'Nom de la campagne non disponible'}</h1>
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatutColor(campagneInfo.statut)}`}>
-                      {getStatutText(campagneInfo.statut)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Image de la campagne */}
+          <div className="relative h-48">
+            <Image
+              src={campagneImage}
+              alt={campagneInfo.nom || 'Campagne'}
+              fill
+              className="object-cover"
+            />
           </div>
 
           <div className="p-6">
