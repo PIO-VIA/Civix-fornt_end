@@ -1,9 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { CheckCircle2, User, Vote, AlertTriangle,  Info, Loader2 } from 'lucide-react';
+import { CheckCircle2, User, Vote, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { ElectionDTO, CandidatDTO, ResultatsElectionDTO, ElectionsService, CandidatsPublicService, VoterElectionRequest } from '@/lib';
 import { AuthenticatedElectionsService, AuthenticatedVoteService } from '@/lib/auth/authenticatedServices';
 import { useState } from 'react';
@@ -32,6 +30,7 @@ const useElectionData = (electionId: string) => {
       }
       const peutVoterResponse = await AuthenticatedVoteService.verifierPeutVoter();
       const canVote = peutVoterResponse.peutVoter || false;
+      console.log('Candidats récupérés:', candidats);
       return { election, candidats: candidats || [], canVote };
     },
     enabled: !!electionId,
@@ -39,7 +38,6 @@ const useElectionData = (electionId: string) => {
 };
 
 export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedCandidat, setSelectedCandidat] = useState<string>('');
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -55,7 +53,7 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
 
   const voteMutation = useMutation({
     mutationFn: (candidatId: string) => {
-      const request: VoterElectionRequest = { candidatId };
+      const request: VoterElectionRequest = { candidatId, electionId };
       return AuthenticatedElectionsService.voterPourElection(electionId, request);
     },
     onSuccess: () => {
@@ -125,14 +123,14 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">{"Résultats de l'élection"}</h4>
                 <div className="space-y-3">
-                  {resultsData.resultatsCandidats && resultsData.resultatsCandidats.length > 0 ? (
-                    resultsData.resultatsCandidats.map((resultat) => (
+                  {resultsData.resultatsParCandidat && resultsData.resultatsParCandidat.length > 0 ? (
+                    resultsData.resultatsParCandidat.map((resultat) => (
                       <div key={resultat.candidatId} className="flex items-center justify-between bg-gray-100 p-3 rounded-md">
                         <div className="flex items-center">
                           <User className="w-5 h-5 text-gray-600 mr-3" />
-                          <span className="font-medium text-gray-800">{resultat.nomCandidat}</span>
+                          <span className="font-medium text-gray-800">{resultat.candidatNom}</span>
                         </div>
-                        <span className="font-semibold text-blue-700">{resultat.nombreVotes} votes ({resultat.pourcentage}%)</span>
+                        <span className="font-semibold text-blue-700">{resultat.nombreVotes} votes ({resultat.pourcentageVotes}%)</span>
                       </div>
                     ))
                   ) : (
@@ -149,14 +147,18 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
               <p className="text-sm text-gray-600">Cliquez sur la carte du candidat pour le sélectionner.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {candidats.map((candidat) => (
-                <VoteCandidatCard 
-                  key={candidat.id}
-                  candidat={candidat}
-                  isSelected={selectedCandidat === candidat.id}
-                  onClick={() => setSelectedCandidat(candidat.id || '')}
-                />
-              ))}
+              {candidats.map((candidat) => {
+                const candidatInfo = (candidat as any).candidat || candidat;
+                const candidatId = candidatInfo.externalIdCandidat || candidat.externalIdCandidat;
+                return (
+                  <VoteCandidatCard 
+                    key={candidatId}
+                    candidat={candidat}
+                    isSelected={selectedCandidat === candidatId}
+                    onClick={() => setSelectedCandidat(candidatId || '')}
+                  />
+                );
+              })}
             </div>
             <div className="flex justify-end pt-6 border-t border-gray-200">
               <button 

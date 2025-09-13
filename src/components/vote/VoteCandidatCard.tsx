@@ -11,6 +11,10 @@ interface VoteCandidatCardProps {
 }
 
 export function VoteCandidatCard({ candidat, isSelected, onClick }: VoteCandidatCardProps) {
+  console.log('Candidat dans VoteCandidatCard:', candidat);
+  
+  // Extraire les informations du candidat selon la structure réelle
+  const candidatInfo = (candidat as any).candidat || candidat;
 
   return (
     <motion.div
@@ -44,16 +48,16 @@ export function VoteCandidatCard({ candidat, isSelected, onClick }: VoteCandidat
         {/* Nom et identifiant */}
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {candidat.username || 'Nom non disponible'}
+            {candidatInfo.username || candidatInfo.email?.split('@')[0] || candidatInfo.externalIdCandidat || 'Nom non disponible'}
           </h3>
-          {candidat.parti && (
-            <p className="text-sm text-blue-600 font-medium">{candidat.parti}</p>
+          {candidatInfo.description && (
+            <p className="text-sm text-blue-600 font-medium">Candidat</p>
           )}
         </div>
 
-        {/* Slogan ou biographie courte */}
+        {/* Description ou biographie courte */}
         <p className="text-gray-600 text-sm mb-4 h-10">
-          {candidat.slogan || 'Slogan ou description du candidat à venir.'}
+          {candidatInfo.description || 'Description du candidat à venir.'}
         </p>
         
         <div className="pt-4 border-t border-gray-100">

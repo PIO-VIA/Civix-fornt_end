@@ -38,9 +38,8 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
         const electionsAvecStatut = await Promise.all(
           electionsOuvertes.map(async (election) => {
             try {
-              const statutVote = await VoteService.verifierStatutVoteElecteur(
-                '', // Le token sera envoyé via cookie httpOnly
-                election.externalIdElection!
+              const statutVote = await VoteService.obtenirStatutVote(
+                '' // Le token sera envoyé via cookie httpOnly
               );
               return {
                 ...election,
