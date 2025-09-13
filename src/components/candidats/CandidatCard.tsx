@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { User, Mail, Vote } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { CandidatDTO } from '@/types';
@@ -11,6 +12,12 @@ interface CandidatCardProps {
 
 export function CandidatCard({ candidat }: CandidatCardProps) {
   const nombreCampagnes = candidat.campagnes?.length || 0;
+  
+  const isValidPath = (path?: string) => {
+    return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
+  };
+  
+  const candidatImage = isValidPath(candidat.photo) ? candidat.photo! : '/assets/poduim.jpeg';
 
   return (
     <motion.div
@@ -19,26 +26,36 @@ export function CandidatCard({ candidat }: CandidatCardProps) {
       transition={{ duration: 0.3 }}
       className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden"
     >
-      {/* Photo de profil */}
-      <div className="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative">
+      {/* Photo du candidat */}
+      <div className="relative h-48">
+        <Image
+          src={candidatImage}
+          alt={candidat.username || 'Candidat'}
+          fill
+          className="object-cover"
+        />
         <div className="absolute bottom-4 left-4">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
-            <User className="w-8 h-8 text-blue-600" />
+          <div className="bg-white bg-opacity-90 rounded-lg px-3 py-1">
+            <span className="text-sm font-medium text-gray-900">
+              {candidat.username || 'Candidat'}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="p-6 pt-8">
-        {/* Nom et identifiant */}
+      <div className="p-6">
+        {/* Informations du candidat */}
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {candidat.username || 'Nom non disponible'}
-          </h3>
           {candidat.email && (
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 mb-2">
               <Mail className="w-4 h-4 mr-2" />
               <span className="truncate">{candidat.email}</span>
             </div>
+          )}
+          {candidat.description && (
+            <p className="text-gray-700 text-sm line-clamp-2">
+              {candidat.description}
+            </p>
           )}
         </div>
 

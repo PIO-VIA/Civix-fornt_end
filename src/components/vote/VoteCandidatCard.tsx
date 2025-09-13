@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { User, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { CandidatDTO } from '@/lib/models/CandidatDTO';
@@ -15,6 +16,12 @@ export function VoteCandidatCard({ candidat, isSelected, onClick }: VoteCandidat
   
   // Extraire les informations du candidat selon la structure réelle
   const candidatInfo = (candidat as any).candidat || candidat;
+  
+  const isValidPath = (path?: string) => {
+    return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
+  };
+  
+  const candidatImage = isValidPath(candidatInfo.photo) ? candidatInfo.photo! : '/assets/poduim.jpeg';
 
   return (
     <motion.div
@@ -34,31 +41,30 @@ export function VoteCandidatCard({ candidat, isSelected, onClick }: VoteCandidat
         </div>
       )}
       
-      {/* Photo de profil */}
-      <div className="h-32 bg-gradient-to-br from-gray-300 to-gray-400 relative">
-        {/* Remplacer par une vraie image si disponible */}
+      {/* Photo du candidat */}
+      <div className="relative h-48">
+        <Image
+          src={candidatImage}
+          alt={candidatInfo.username || 'Candidat'}
+          fill
+          className="object-cover"
+        />
         <div className="absolute bottom-4 left-4">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
-            <User className="w-8 h-8 text-gray-500" />
+          <div className="bg-white bg-opacity-90 rounded-lg px-3 py-1">
+            <span className="text-sm font-medium text-gray-900">
+              {candidatInfo.username || candidatInfo.email?.split('@')[0] || 'Candidat'}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="p-6 pt-8">
-        {/* Nom et identifiant */}
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {candidatInfo.username || candidatInfo.email?.split('@')[0] || candidatInfo.externalIdCandidat || 'Nom non disponible'}
-          </h3>
-          {candidatInfo.description && (
-            <p className="text-sm text-blue-600 font-medium">Candidat</p>
-          )}
-        </div>
-
+      <div className="p-6">
         {/* Description ou biographie courte */}
-        <p className="text-gray-600 text-sm mb-4 h-10">
-          {candidatInfo.description || 'Description du candidat à venir.'}
-        </p>
+        <div className="mb-4">
+          <p className="text-gray-600 text-sm line-clamp-3 min-h-[60px]">
+            {candidatInfo.description || 'Description du candidat à venir.'}
+          </p>
+        </div>
         
         <div className="pt-4 border-t border-gray-100">
            <p className="text-xs text-center text-gray-500">Cliquez pour sélectionner</p>
