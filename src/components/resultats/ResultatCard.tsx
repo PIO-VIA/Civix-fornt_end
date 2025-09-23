@@ -102,7 +102,7 @@ export function ResultatCard({ election, resultats }: ResultatCardProps) {
                   
                   return (
                     <motion.div
-                      key={resultat.candidat?.externalIdCandidat || index}
+                      key={resultat.candidatId || index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -118,7 +118,7 @@ export function ResultatCard({ election, resultats }: ResultatCardProps) {
                             <Crown className="w-5 h-5 text-yellow-500 mr-2" />
                           )}
                           <span className="font-medium text-gray-900">
-                            {resultat.candidat?.username || 'Candidat inconnu'}
+                            {resultat.candidatNom || 'Candidat inconnu'}
                           </span>
                         </div>
                         <div className="text-right">

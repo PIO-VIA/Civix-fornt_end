@@ -31,8 +31,7 @@ export function CampagnesList({ filters }: CampagnesListProps) {
     filteredCampagnes = filteredCampagnes.filter(
       campagne => 
         campagne.description?.toLowerCase().includes(searchTerm) ||
-        campagne.candidat?.username?.toLowerCase().includes(searchTerm) ||
-        campagne.candidat?.email?.toLowerCase().includes(searchTerm)
+        campagne.candidat?.username?.toLowerCase().includes(searchTerm)
     );
   }
 

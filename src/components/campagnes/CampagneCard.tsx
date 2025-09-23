@@ -12,7 +12,6 @@ interface CampagneCardProps {
 
 export function CampagneCard({ campagne }: CampagneCardProps) {
   const candidatNom = campagne.candidat?.username || 'Candidat inconnu';
-  const candidatEmail = campagne.candidat?.email;
 
   return (
     <motion.div
@@ -46,12 +45,7 @@ export function CampagneCard({ campagne }: CampagneCardProps) {
               <h3 className="text-lg font-semibold text-gray-900 mb-1">
                 Campagne de {candidatNom}
               </h3>
-              {candidatEmail && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <User className="w-4 h-4 mr-2" />
-                  <span>{candidatEmail}</span>
-                </div>
-              )}
+             
             </div>
           </div>
 

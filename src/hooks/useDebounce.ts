@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 
 // Définition d'un type pour la fonction de rappel déboncée
-type DebouncedFunction<T extends (...args: unknown[]) => unknown> = (
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DebouncedFunction<T extends (...args: any[]) => any> = (
   ...args: Parameters<T>
 ) => void;
 
@@ -13,7 +14,8 @@ type DebouncedFunction<T extends (...args: unknown[]) => unknown> = (
  * @param delay Le délai en millisecondes.
  * @returns Une version déboncée de la fonction de rappel.
  */
-export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number
 ): DebouncedFunction<T> {
