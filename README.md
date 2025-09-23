@@ -5,6 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
+
 CIVIX is a professional and responsive electoral interface built with Next.js 15, featuring the App Router and strict TypeScript. It is designed to integrate seamlessly with an existing Spring Boot API, reusing all data models and services from the backend.
 
 ## 🚀 Key Features
