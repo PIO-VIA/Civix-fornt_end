@@ -208,21 +208,13 @@ export default function CandidatPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-2">
-                          {campagne.nom || `Campagne ${index + 1}`}
+                          {`Campagne ${index + 1}`}
                         </h3>
                         {campagne.description && (
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                             {campagne.description}
                           </p>
                         )}
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          {campagne.dateDebut && (
-                            <span>Début: {new Date(campagne.dateDebut).toLocaleDateString('fr-FR')}</span>
-                          )}
-                          {campagne.dateFin && (
-                            <span>Fin: {new Date(campagne.dateFin).toLocaleDateString('fr-FR')}</span>
-                          )}
-                        </div>
                       </div>
                       {campagne.externalIdCampagne && (
                         <Link

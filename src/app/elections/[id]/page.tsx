@@ -304,7 +304,7 @@ export default function ElectionPage() {
                                   </div>
                                   <div>
                                     <h3 className="font-semibold text-gray-900">
-                                      {candidat.candidat?.username || candidat.candidatNom || `Candidat ${index + 1}`}
+                                      {candidat.candidatNom || `Candidat ${index + 1}`}
                                     </h3>
                                     <p className="text-sm text-gray-600">
                                       {candidat.nombreVotes || 0} votes

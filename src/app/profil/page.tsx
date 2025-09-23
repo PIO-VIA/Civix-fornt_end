@@ -45,7 +45,7 @@ export default function ProfilPage() {
                 </div>
                 <div className="p-6">
                   <Suspense fallback={<LoadingSkeleton count={1} />}>
-                    <ProfilInfo user={user || undefined} />
+                    <ProfilInfo user={user} />
                   </Suspense>
                 </div>
               </div>

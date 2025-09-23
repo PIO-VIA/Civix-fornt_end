@@ -4,10 +4,10 @@ import { Mail, User, Calendar, Shield } from 'lucide-react';
 
 interface ProfilInfoProps {
   user?: {
-    externalIdElecteur: string;
+    externalIdElecteur?: string;
     username?: string;
     email?: string;
-  };
+  } | null;
 }
 
 export function ProfilInfo({ user }: ProfilInfoProps) {
