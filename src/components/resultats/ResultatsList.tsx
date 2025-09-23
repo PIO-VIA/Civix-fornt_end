@@ -27,7 +27,7 @@ export function ResultatsList() {
             Aucun résultat disponible
           </h3>
           <p className="text-gray-600">
-            Il n'y a actuellement aucun résultat d'élection à afficher.
+            {"Il n'y a actuellement aucun résultat d'élection à afficher."}
           </p>
         </div>
       </div>

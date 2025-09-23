@@ -119,7 +119,7 @@ export function ElectionsActives({ userId }: ElectionsActivesProps) {
             Aucune élection disponible
           </h3>
           <p className="text-gray-600">
-            Vous n'êtes inscrit à aucune élection ouverte au vote actuellement, ou vous avez déjà voté pour toutes les élections disponibles.
+            {"Vous n'êtes inscrit à aucune élection ouverte au vote actuellement, ou vous avez déjà voté pour toutes les élections disponibles."}
           </p>
         </div>
       </div>

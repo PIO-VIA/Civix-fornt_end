@@ -35,7 +35,7 @@ export default function DetailedVotePage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Voter pour l'élection
+                  {"Voter pour l'élection"}
                 </h1>
                 <p className="text-lg text-gray-600">
                   Sélectionnez votre candidat et confirmez votre vote.

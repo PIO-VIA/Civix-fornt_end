@@ -12,7 +12,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Users,
+  
 } from 'lucide-react';
 import { ElectionsService, AdministrationService } from '@/lib';
 import { PodiumResultats } from '@/components/resultats/PodiumResultats';

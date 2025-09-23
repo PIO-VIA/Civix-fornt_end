@@ -24,7 +24,7 @@ const formatDate = (dateString?: string) => {
   });
 };
 
-export function ElectionVoteCard({ election, userId }: ElectionVoteCardProps) {
+export function ElectionVoteCard({ election }: ElectionVoteCardProps) {
   const hasVoted = election.aVote;
   const canVote = election.peutVoter && !hasVoted;
 

@@ -157,8 +157,7 @@ export function DetailedVoteForm({ electionId }: DetailedVoteFormProps) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {candidats.map((candidat) => {
-                const candidatInfo = (candidat as any).candidat || candidat;
-                const candidatId = candidatInfo.externalIdCandidat || candidat.externalIdCandidat;
+                const candidatId = candidat.externalIdCandidat;
                 return (
                   <VoteCandidatCard 
                     key={candidatId}

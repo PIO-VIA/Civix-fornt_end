@@ -38,8 +38,11 @@ export function LoginForm() {
         motDePasse: data.password,
       });
       // La redirection est gérée dans le AuthProvider
-    } catch (err: any) {
-      const errorMessage = err.body?.message || err.message || 'Une erreur est survenue.';
+    } catch (err: unknown) {
+      const errorMessage =
+        (err as { body?: { message?: string }; message?: string })?.body?.message ||
+        (err as { message?: string })?.message ||
+        'Une erreur est survenue.';
       setError(errorMessage);
       setIsSubmitting(false);
     }

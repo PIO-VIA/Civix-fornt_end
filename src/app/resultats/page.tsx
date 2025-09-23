@@ -5,10 +5,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ResultatsList } from '@/components/resultats/ResultatsList';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { BarChart3, TrendingUp, Users } from 'lucide-react';
-import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function ResultatsPage() {
-  const { user } = useAuth();
 
   return (
     <ProtectedRoute>

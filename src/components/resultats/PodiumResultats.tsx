@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Crown, Medal, Award } from 'lucide-react';
-import type { ResultatCandidatDTO } from '@/types';
+import type { ResultatCandidatDTO } from '@/lib/models/ResultatCandidatDTO';
 
 interface PodiumResultatsProps {
   candidats: ResultatCandidatDTO[];
@@ -78,7 +78,7 @@ export function PodiumResultats({ candidats, totalVotes }: PodiumResultatsProps)
           className="mx-auto mb-4 rounded-lg"
         />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">Podium des résultats</h3>
-        <p className="text-gray-600">Les 3 premiers candidats de l'élection</p>
+        <p className="text-gray-600">{"Les 3 premiers candidats de l'élection"}</p>
       </div>
 
       {podiumOrder.length > 0 ? (
@@ -107,7 +107,7 @@ export function PodiumResultats({ candidats, totalVotes }: PodiumResultatsProps)
                     {getPodiumIcon(realPosition)}
                   </div>
                   <h4 className="font-semibold text-gray-900 text-sm max-w-20 truncate">
-                    {candidat.candidat?.username || candidat.candidatNom || `Candidat ${realPosition + 1}`}
+                    {candidat.candidatNom || `Candidat ${realPosition + 1}`}
                   </h4>
                   <p className="text-xs text-gray-600 mt-1">
                     {candidat.nombreVotes || 0} votes

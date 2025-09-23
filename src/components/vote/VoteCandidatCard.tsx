@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { User, CheckCircle2 } from 'lucide-react';
+import {  CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { CandidatDTO } from '@/lib/models/CandidatDTO';
 
@@ -14,8 +14,8 @@ interface VoteCandidatCardProps {
 export function VoteCandidatCard({ candidat, isSelected, onClick }: VoteCandidatCardProps) {
   console.log('Candidat dans VoteCandidatCard:', candidat);
   
-  // Extraire les informations du candidat selon la structure réelle
-  const candidatInfo = (candidat as any).candidat || candidat;
+  // Utiliser directement l'objet candidat
+  const candidatInfo = candidat;
   
   const isValidPath = (path?: string) => {
     return path && path.trim() !== '' && path !== 'string' && (path.startsWith('/') || path.startsWith('http'));
