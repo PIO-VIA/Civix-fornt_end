@@ -3,7 +3,7 @@ import axios from 'axios';
 import { OpenAPI } from '@/lib/core/OpenAPI';
 
 // Configure l'URL de base de l'API 
-OpenAPI.BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+OpenAPI.BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://civix-1-23wr.onrender.com';
 
 // Temporairement désactivé pour debug - réactiver après résolution du problème CORS
 OpenAPI.WITH_CREDENTIALS = false;
